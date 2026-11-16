@@ -1,0 +1,13 @@
+# Xcode products and local caches
+build/
+DerivedData/
+**/DerivedData/
+*.xcresult/
+*.xcuserstate
+xcuserdata/
+
+# Machine-local Supabase endpoint/keys
+Config/Supabase.local.xcconfig
+
+# Local web client configuration
+web/.env.local

@@ -1,0 +1,653 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		132B7E6535B3707A67888BB9 /* SafetySupportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCE21D2250DFD09BB641162D /* SafetySupportView.swift */; };
+		14C05571CCF3853533C0FF1D /* CommentsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35CD723B0C6EF21973CC03DD /* CommentsSheet.swift */; };
+		157750AA443DB38FC67EE4AB /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E31D5732E4999BAA8C86BEF /* AccountView.swift */; };
+		161D70BA3E4846648D68565D /* CatharsiaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14F353D602E2F7CEC9FABA1B /* CatharsiaApp.swift */; };
+		1B0A5E4FBA288B3F6420DD26 /* ExternalLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79CFFB8AC597B230F97DAE67 /* ExternalLink.swift */; };
+		1B1E2CBB98272279E76757AD /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AECBE374100780358A6C1DF /* ExploreView.swift */; };
+		2519A402B5CF4CCEEAB73123 /* ActivityNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12D05A3C7E39BC718D1C513D /* ActivityNotification.swift */; };
+		26B168DC9222BF9655FF0838 /* PostPhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11E43060635F754209DB932 /* PostPhotoView.swift */; };
+		27B1B07EFA5036E9A51573CC /* SupabaseConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177D2FF8482DB41377F8651B /* SupabaseConfiguration.swift */; };
+		2FD3616DA78FC8189717AC3C /* TherapistReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11D4D448B91B20453C86A10 /* TherapistReviewView.swift */; };
+		32C15AF4848CFA080AD17FDA /* WelcomeOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1357BCE20E6A2DE0D72D00BC /* WelcomeOnboardingView.swift */; };
+		3BE2125B24CF0FCCEFCC3599 /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 482FC633608D5D26979963F1 /* PrivacyPolicyView.swift */; };
+		3FF7130C41AD17C0AC8124AB /* ComposePostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AFBC1DFA46B4D4670B65FD5 /* ComposePostView.swift */; };
+		472EC012A325A1E3C7C5570F /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569EBD01380D96BE9B931BF0 /* RootTabView.swift */; };
+		4EEACAB857674B1E39FEBAF0 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 5A1A05A20C35CEB84499E184 /* Supabase */; };
+		51402494A5D7D3A72EBD59AF /* CatharsiaStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB212CA243C258A93A3C5353 /* CatharsiaStyle.swift */; };
+		5BFADD933BE7D33368FC72CD /* CatharsiaRefreshChime.swift in Sources */ = {isa = PBXBuildFile; fileRef = C31540F4B15A432685DBC408 /* CatharsiaRefreshChime.swift */; };
+		6097C6D913064593B09DA08E /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FBBA8148D214BC5A9D8E946 /* NotificationSettingsView.swift */; };
+		707436632CB1DD112E227BC9 /* Community.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AF47433E8EBB99E169B1C40 /* Community.swift */; };
+		782AAFDCFEF55E9E4A96E980 /* BentoLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA694430C36F7E7216E41817 /* BentoLink.swift */; };
+		78592435F92C56B74EE1FC23 /* ActivityNotificationCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1435A37658A50B705E5426EE /* ActivityNotificationCenterView.swift */; };
+		78878E30B4083E2476387495 /* SupabaseNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54D8DEB0023C617970AD511 /* SupabaseNotificationService.swift */; };
+		7B1639C760962762F13A37A0 /* TherapistApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FCE95822DD75D5E82C0C72 /* TherapistApplication.swift */; };
+		84AA7EFC502A0E5F3F4F2238 /* ModerationQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD03B49E477CF0B789BFB8A5 /* ModerationQueueView.swift */; };
+		88591492BB6C9E8F6186AC08 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CB0B88E1342537572B033D8E /* PrivacyInfo.xcprivacy */; };
+		997801904EADFA0B13F11312 /* SavedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061D5D121BF680EA4129C8D2 /* SavedView.swift */; };
+		9DE58384CF169C47EF3D8BE6 /* CommunityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5471813C119562F4BF691E3B /* CommunityView.swift */; };
+		ACF48493B705258CC1EAC77F /* BentoPageViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2ABF60CEC592D0596415FC /* BentoPageViews.swift */; };
+		AD0837D9B4A903F323CF132D /* MemberProfileEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977D37A920E4919099A02394 /* MemberProfileEditorView.swift */; };
+		B3E72FA293874638B3E415AF /* BetaPublisherCodeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F92C18D11B4B9D8A22E28A /* BetaPublisherCodeSettingsView.swift */; };
+		B5512E7EE861C85EF3924F5F /* SupabaseServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 784B7F47764E5E86391453FD /* SupabaseServices.swift */; };
+		B66A1C9CD4F0CBBA6DD8B513 /* AdminAnnouncementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4877E8ABCF0F3926C4FFDB99 /* AdminAnnouncementView.swift */; };
+		C192CB38F1EFCAB5BAA58464 /* PublishedPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E986B64555E8C210334482C /* PublishedPost.swift */; };
+		C9E82EC1E306CFB5040977EF /* CatharsiaRefresh.wav in Resources */ = {isa = PBXBuildFile; fileRef = 4D1AF9CF0958E7D8300B9F50 /* CatharsiaRefresh.wav */; };
+		CE1AAB8B7F24291EBFA8C2A6 /* AccountAccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7EC36344DD8A5BAEB4359DE /* AccountAccessView.swift */; };
+		CE28A344CFEC0393B2EFCF1A /* PushNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67892943FF65B30581D66416 /* PushNotificationService.swift */; };
+		CE51E0480D0B78D29D409817 /* SupabaseAccountService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E76E811B2AFAF40759AFEF47 /* SupabaseAccountService.swift */; };
+		D8BC3DF6E383605501A1944A /* SupabaseInteractionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8624CBA794A4737CFD20298A /* SupabaseInteractionService.swift */; };
+		DCDDF5A47EEB2023AE95D76E /* TherapistAccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6FF861C6AC127A947BFF337 /* TherapistAccessView.swift */; };
+		DDB39B6D853ED9B2F8D884A0 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 284421AE0C5945E38E564A54 /* SessionStore.swift */; };
+		F1DCE152645FE15552648652 /* SupabaseCommunityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD29FBCFFA4961D9E79161 /* SupabaseCommunityService.swift */; };
+		F24B7F4432ED6CF0F9B1F7AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 730A1614FDB1928E24253789 /* Assets.xcassets */; };
+		FF9ED2E8072F4E5D26F16C53 /* ExploreFeedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A39A63ECEFEF306F627D0C2C /* ExploreFeedStore.swift */; };
+		FFA30B05409FE2CA6A39E554 /* PostDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 662CDC9AE5E84376EDF73459 /* PostDetailView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		03FCE95822DD75D5E82C0C72 /* TherapistApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TherapistApplication.swift; sourceTree = "<group>"; };
+		061D5D121BF680EA4129C8D2 /* SavedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedView.swift; sourceTree = "<group>"; };
+		0AF47433E8EBB99E169B1C40 /* Community.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Community.swift; sourceTree = "<group>"; };
+		0B219F1D12B2A691A578C34A /* Supabase.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Supabase.xcconfig; sourceTree = "<group>"; };
+		12D05A3C7E39BC718D1C513D /* ActivityNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityNotification.swift; sourceTree = "<group>"; };
+		1357BCE20E6A2DE0D72D00BC /* WelcomeOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeOnboardingView.swift; sourceTree = "<group>"; };
+		1435A37658A50B705E5426EE /* ActivityNotificationCenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityNotificationCenterView.swift; sourceTree = "<group>"; };
+		14F353D602E2F7CEC9FABA1B /* CatharsiaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatharsiaApp.swift; sourceTree = "<group>"; };
+		177D2FF8482DB41377F8651B /* SupabaseConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConfiguration.swift; sourceTree = "<group>"; };
+		1DBD29FBCFFA4961D9E79161 /* SupabaseCommunityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseCommunityService.swift; sourceTree = "<group>"; };
+		284421AE0C5945E38E564A54 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		2AFBC1DFA46B4D4670B65FD5 /* ComposePostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposePostView.swift; sourceTree = "<group>"; };
+		35CD723B0C6EF21973CC03DD /* CommentsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentsSheet.swift; sourceTree = "<group>"; };
+		482FC633608D5D26979963F1 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
+		4877E8ABCF0F3926C4FFDB99 /* AdminAnnouncementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminAnnouncementView.swift; sourceTree = "<group>"; };
+		4AECBE374100780358A6C1DF /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
+		4C2ABF60CEC592D0596415FC /* BentoPageViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BentoPageViews.swift; sourceTree = "<group>"; };
+		4D1AF9CF0958E7D8300B9F50 /* CatharsiaRefresh.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = CatharsiaRefresh.wav; sourceTree = "<group>"; };
+		5471813C119562F4BF691E3B /* CommunityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityView.swift; sourceTree = "<group>"; };
+		569EBD01380D96BE9B931BF0 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
+		662CDC9AE5E84376EDF73459 /* PostDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDetailView.swift; sourceTree = "<group>"; };
+		67892943FF65B30581D66416 /* PushNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationService.swift; sourceTree = "<group>"; };
+		730A1614FDB1928E24253789 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		784B7F47764E5E86391453FD /* SupabaseServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseServices.swift; sourceTree = "<group>"; };
+		79CFFB8AC597B230F97DAE67 /* ExternalLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalLink.swift; sourceTree = "<group>"; };
+		7E31D5732E4999BAA8C86BEF /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		7E986B64555E8C210334482C /* PublishedPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishedPost.swift; sourceTree = "<group>"; };
+		7FBBA8148D214BC5A9D8E946 /* NotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
+		8624CBA794A4737CFD20298A /* SupabaseInteractionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseInteractionService.swift; sourceTree = "<group>"; };
+		977D37A920E4919099A02394 /* MemberProfileEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberProfileEditorView.swift; sourceTree = "<group>"; };
+		9B710BDE9003537FBBE7E1A2 /* Catharsia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Catharsia.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A39A63ECEFEF306F627D0C2C /* ExploreFeedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreFeedStore.swift; sourceTree = "<group>"; };
+		A54D8DEB0023C617970AD511 /* SupabaseNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseNotificationService.swift; sourceTree = "<group>"; };
+		AA694430C36F7E7216E41817 /* BentoLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BentoLink.swift; sourceTree = "<group>"; };
+		BCE21D2250DFD09BB641162D /* SafetySupportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafetySupportView.swift; sourceTree = "<group>"; };
+		C11D4D448B91B20453C86A10 /* TherapistReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TherapistReviewView.swift; sourceTree = "<group>"; };
+		C11E43060635F754209DB932 /* PostPhotoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostPhotoView.swift; sourceTree = "<group>"; };
+		C31540F4B15A432685DBC408 /* CatharsiaRefreshChime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatharsiaRefreshChime.swift; sourceTree = "<group>"; };
+		C4F92C18D11B4B9D8A22E28A /* BetaPublisherCodeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BetaPublisherCodeSettingsView.swift; sourceTree = "<group>"; };
+		C7EC36344DD8A5BAEB4359DE /* AccountAccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountAccessView.swift; sourceTree = "<group>"; };
+		CB0B88E1342537572B033D8E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		E6FF861C6AC127A947BFF337 /* TherapistAccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TherapistAccessView.swift; sourceTree = "<group>"; };
+		E76E811B2AFAF40759AFEF47 /* SupabaseAccountService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseAccountService.swift; sourceTree = "<group>"; };
+		FB212CA243C258A93A3C5353 /* CatharsiaStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatharsiaStyle.swift; sourceTree = "<group>"; };
+		FD03B49E477CF0B789BFB8A5 /* ModerationQueueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModerationQueueView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B13D7A1661E0C8D26953B248 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4EEACAB857674B1E39FEBAF0 /* Supabase in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0EDE902EB9411B02985E661E /* Catharsia */ = {
+			isa = PBXGroup;
+			children = (
+				730A1614FDB1928E24253789 /* Assets.xcassets */,
+				14F353D602E2F7CEC9FABA1B /* CatharsiaApp.swift */,
+				CB0B88E1342537572B033D8E /* PrivacyInfo.xcprivacy */,
+				4DE9F65BDE5600BB0EC3CFDF /* Design */,
+				C9AFFCAEBBDE2F90044CFA45 /* Features */,
+				B6A08D9C486264BAFCBA9BA4 /* Models */,
+				1BE6C2BFC01AF259C14966CF /* Navigation */,
+				61DFF07488B636B1A16839A7 /* Resources */,
+				C76CC63FB0A929AD492A265A /* Services */,
+				BCD5936DC75F5DFFD2CC9BB1 /* State */,
+			);
+			path = Catharsia;
+			sourceTree = "<group>";
+		};
+		1ABE8A44DCE70874EC00CEA8 /* Safety */ = {
+			isa = PBXGroup;
+			children = (
+				BCE21D2250DFD09BB641162D /* SafetySupportView.swift */,
+			);
+			path = Safety;
+			sourceTree = "<group>";
+		};
+		1BE6C2BFC01AF259C14966CF /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				569EBD01380D96BE9B931BF0 /* RootTabView.swift */,
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
+		2131F56E5338035F56B83D2D /* Community */ = {
+			isa = PBXGroup;
+			children = (
+				5471813C119562F4BF691E3B /* CommunityView.swift */,
+			);
+			path = Community;
+			sourceTree = "<group>";
+		};
+		4DE9F65BDE5600BB0EC3CFDF /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				FB212CA243C258A93A3C5353 /* CatharsiaStyle.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		611CE2280F088102AB3D361C = {
+			isa = PBXGroup;
+			children = (
+				D78ADA0A6A2187FC0311A133 /* Config */,
+				9E764D72A4600ADE720B58BE /* Sources */,
+				BCC01D2B09A10D2787F96E97 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		61DFF07488B636B1A16839A7 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				4D1AF9CF0958E7D8300B9F50 /* CatharsiaRefresh.wav */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		6A45B0BF57B61C79F9E4AA34 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				1435A37658A50B705E5426EE /* ActivityNotificationCenterView.swift */,
+				7FBBA8148D214BC5A9D8E946 /* NotificationSettingsView.swift */,
+			);
+			path = Notifications;
+			sourceTree = "<group>";
+		};
+		8FE091A7772A9D9EDBD69D79 /* Explore */ = {
+			isa = PBXGroup;
+			children = (
+				35CD723B0C6EF21973CC03DD /* CommentsSheet.swift */,
+				2AFBC1DFA46B4D4670B65FD5 /* ComposePostView.swift */,
+				4AECBE374100780358A6C1DF /* ExploreView.swift */,
+				662CDC9AE5E84376EDF73459 /* PostDetailView.swift */,
+				C11E43060635F754209DB932 /* PostPhotoView.swift */,
+			);
+			path = Explore;
+			sourceTree = "<group>";
+		};
+		9E764D72A4600ADE720B58BE /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				0EDE902EB9411B02985E661E /* Catharsia */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		B3A2F4A94D536848003B27EA /* Saved */ = {
+			isa = PBXGroup;
+			children = (
+				061D5D121BF680EA4129C8D2 /* SavedView.swift */,
+			);
+			path = Saved;
+			sourceTree = "<group>";
+		};
+		B6A08D9C486264BAFCBA9BA4 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				12D05A3C7E39BC718D1C513D /* ActivityNotification.swift */,
+				AA694430C36F7E7216E41817 /* BentoLink.swift */,
+				0AF47433E8EBB99E169B1C40 /* Community.swift */,
+				79CFFB8AC597B230F97DAE67 /* ExternalLink.swift */,
+				7E986B64555E8C210334482C /* PublishedPost.swift */,
+				03FCE95822DD75D5E82C0C72 /* TherapistApplication.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		BCC01D2B09A10D2787F96E97 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9B710BDE9003537FBBE7E1A2 /* Catharsia.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BCD5936DC75F5DFFD2CC9BB1 /* State */ = {
+			isa = PBXGroup;
+			children = (
+				A39A63ECEFEF306F627D0C2C /* ExploreFeedStore.swift */,
+				284421AE0C5945E38E564A54 /* SessionStore.swift */,
+			);
+			path = State;
+			sourceTree = "<group>";
+		};
+		C76CC63FB0A929AD492A265A /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				C31540F4B15A432685DBC408 /* CatharsiaRefreshChime.swift */,
+				67892943FF65B30581D66416 /* PushNotificationService.swift */,
+				E76E811B2AFAF40759AFEF47 /* SupabaseAccountService.swift */,
+				1DBD29FBCFFA4961D9E79161 /* SupabaseCommunityService.swift */,
+				177D2FF8482DB41377F8651B /* SupabaseConfiguration.swift */,
+				8624CBA794A4737CFD20298A /* SupabaseInteractionService.swift */,
+				A54D8DEB0023C617970AD511 /* SupabaseNotificationService.swift */,
+				784B7F47764E5E86391453FD /* SupabaseServices.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		C9AFFCAEBBDE2F90044CFA45 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				DABC63F3774584A3A0C1F524 /* Account */,
+				2131F56E5338035F56B83D2D /* Community */,
+				8FE091A7772A9D9EDBD69D79 /* Explore */,
+				6A45B0BF57B61C79F9E4AA34 /* Notifications */,
+				1ABE8A44DCE70874EC00CEA8 /* Safety */,
+				B3A2F4A94D536848003B27EA /* Saved */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		D78ADA0A6A2187FC0311A133 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				0B219F1D12B2A691A578C34A /* Supabase.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		DABC63F3774584A3A0C1F524 /* Account */ = {
+			isa = PBXGroup;
+			children = (
+				C7EC36344DD8A5BAEB4359DE /* AccountAccessView.swift */,
+				7E31D5732E4999BAA8C86BEF /* AccountView.swift */,
+				4877E8ABCF0F3926C4FFDB99 /* AdminAnnouncementView.swift */,
+				C4F92C18D11B4B9D8A22E28A /* BetaPublisherCodeSettingsView.swift */,
+				4C2ABF60CEC592D0596415FC /* BentoPageViews.swift */,
+				977D37A920E4919099A02394 /* MemberProfileEditorView.swift */,
+				FD03B49E477CF0B789BFB8A5 /* ModerationQueueView.swift */,
+				482FC633608D5D26979963F1 /* PrivacyPolicyView.swift */,
+				E6FF861C6AC127A947BFF337 /* TherapistAccessView.swift */,
+				C11D4D448B91B20453C86A10 /* TherapistReviewView.swift */,
+				1357BCE20E6A2DE0D72D00BC /* WelcomeOnboardingView.swift */,
+			);
+			path = Account;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CAA75176E3849A3449F4E2E7 /* Catharsia */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 69BA2EBD6E87B6B131B58980 /* Build configuration list for PBXNativeTarget "Catharsia" */;
+			buildPhases = (
+				6FE67369A6661E851EB39D08 /* Sources */,
+				DA334C27B7C8F6142B2E91CB /* Resources */,
+				B13D7A1661E0C8D26953B248 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Catharsia;
+			packageProductDependencies = (
+				5A1A05A20C35CEB84499E184 /* Supabase */,
+			);
+			productName = Catharsia;
+			productReference = 9B710BDE9003537FBBE7E1A2 /* Catharsia.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		535DC82AD69A789E8656D606 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					CAA75176E3849A3449F4E2E7 = {
+						SystemCapabilities = {
+							com.apple.SignInWithApple = {
+								enabled = 1;
+							};
+						};
+					};
+				};
+			};
+			buildConfigurationList = BDCDF58BAB48CF45B4B6C293 /* Build configuration list for PBXProject "Catharsia" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 611CE2280F088102AB3D361C;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				31A542F25ECE575C228BAB09 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CAA75176E3849A3449F4E2E7 /* Catharsia */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DA334C27B7C8F6142B2E91CB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F24B7F4432ED6CF0F9B1F7AA /* Assets.xcassets in Resources */,
+				C9E82EC1E306CFB5040977EF /* CatharsiaRefresh.wav in Resources */,
+				88591492BB6C9E8F6186AC08 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6FE67369A6661E851EB39D08 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CE1AAB8B7F24291EBFA8C2A6 /* AccountAccessView.swift in Sources */,
+				157750AA443DB38FC67EE4AB /* AccountView.swift in Sources */,
+				2519A402B5CF4CCEEAB73123 /* ActivityNotification.swift in Sources */,
+				78592435F92C56B74EE1FC23 /* ActivityNotificationCenterView.swift in Sources */,
+				B66A1C9CD4F0CBBA6DD8B513 /* AdminAnnouncementView.swift in Sources */,
+				B3E72FA293874638B3E415AF /* BetaPublisherCodeSettingsView.swift in Sources */,
+				782AAFDCFEF55E9E4A96E980 /* BentoLink.swift in Sources */,
+				ACF48493B705258CC1EAC77F /* BentoPageViews.swift in Sources */,
+				161D70BA3E4846648D68565D /* CatharsiaApp.swift in Sources */,
+				5BFADD933BE7D33368FC72CD /* CatharsiaRefreshChime.swift in Sources */,
+				51402494A5D7D3A72EBD59AF /* CatharsiaStyle.swift in Sources */,
+				14C05571CCF3853533C0FF1D /* CommentsSheet.swift in Sources */,
+				707436632CB1DD112E227BC9 /* Community.swift in Sources */,
+				9DE58384CF169C47EF3D8BE6 /* CommunityView.swift in Sources */,
+				3FF7130C41AD17C0AC8124AB /* ComposePostView.swift in Sources */,
+				FF9ED2E8072F4E5D26F16C53 /* ExploreFeedStore.swift in Sources */,
+				1B1E2CBB98272279E76757AD /* ExploreView.swift in Sources */,
+				1B0A5E4FBA288B3F6420DD26 /* ExternalLink.swift in Sources */,
+				AD0837D9B4A903F323CF132D /* MemberProfileEditorView.swift in Sources */,
+				84AA7EFC502A0E5F3F4F2238 /* ModerationQueueView.swift in Sources */,
+				6097C6D913064593B09DA08E /* NotificationSettingsView.swift in Sources */,
+				FFA30B05409FE2CA6A39E554 /* PostDetailView.swift in Sources */,
+				26B168DC9222BF9655FF0838 /* PostPhotoView.swift in Sources */,
+				3BE2125B24CF0FCCEFCC3599 /* PrivacyPolicyView.swift in Sources */,
+				C192CB38F1EFCAB5BAA58464 /* PublishedPost.swift in Sources */,
+				CE28A344CFEC0393B2EFCF1A /* PushNotificationService.swift in Sources */,
+				472EC012A325A1E3C7C5570F /* RootTabView.swift in Sources */,
+				132B7E6535B3707A67888BB9 /* SafetySupportView.swift in Sources */,
+				997801904EADFA0B13F11312 /* SavedView.swift in Sources */,
+				DDB39B6D853ED9B2F8D884A0 /* SessionStore.swift in Sources */,
+				CE51E0480D0B78D29D409817 /* SupabaseAccountService.swift in Sources */,
+				F1DCE152645FE15552648652 /* SupabaseCommunityService.swift in Sources */,
+				27B1B07EFA5036E9A51573CC /* SupabaseConfiguration.swift in Sources */,
+				D8BC3DF6E383605501A1944A /* SupabaseInteractionService.swift in Sources */,
+				78878E30B4083E2476387495 /* SupabaseNotificationService.swift in Sources */,
+				B5512E7EE861C85EF3924F5F /* SupabaseServices.swift in Sources */,
+				DCDDF5A47EEB2023AE95D76E /* TherapistAccessView.swift in Sources */,
+				7B1639C760962762F13A37A0 /* TherapistApplication.swift in Sources */,
+				2FD3616DA78FC8189717AC3C /* TherapistReviewView.swift in Sources */,
+				32C15AF4848CFA080AD17FDA /* WelcomeOnboardingView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0A598FC4B349D8FAF41E9741 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0B219F1D12B2A691A578C34A /* Supabase.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = Config/Catharsia.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = DG4DARLJ54;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Config/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Catharsia;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Catharsia uses the camera so authorized therapists and administrators can create educational posts.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Catharsia uses the microphone when authorized therapists and administrators record video posts.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.catharsia.ios;
+				PRODUCT_NAME = Catharsia;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		6B687A7244BB2EBB8CD75692 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		75D71E6A8AFCAD375735D7E3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		DEBA68761C60B45721F86CB8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0B219F1D12B2A691A578C34A /* Supabase.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = Config/Catharsia.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = DG4DARLJ54;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Config/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Catharsia;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Catharsia uses the camera so authorized therapists and administrators can create educational posts.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Catharsia uses the microphone when authorized therapists and administrators record video posts.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.catharsia.ios;
+				PRODUCT_NAME = Catharsia;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		69BA2EBD6E87B6B131B58980 /* Build configuration list for PBXNativeTarget "Catharsia" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DEBA68761C60B45721F86CB8 /* Debug */,
+				0A598FC4B349D8FAF41E9741 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BDCDF58BAB48CF45B4B6C293 /* Build configuration list for PBXProject "Catharsia" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6B687A7244BB2EBB8CD75692 /* Debug */,
+				75D71E6A8AFCAD375735D7E3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		31A542F25ECE575C228BAB09 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.54.1;
+			};
+			traits = (
+			);
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5A1A05A20C35CEB84499E184 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 31A542F25ECE575C228BAB09 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 535DC82AD69A789E8656D606 /* Project object */;
+}

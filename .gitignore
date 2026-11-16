@@ -1,0 +1,25 @@
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
+# Xcode build products and local workspace state
+**/DerivedData/
+**/*DerivedData/
+**/*.xcresult/
+**/build/
+**/xcuserdata/
+**/supabase/.temp/
+
+# Local credentials and environment files
+**/.env
+**/.env.*
+!**/.env.example
+**/Supabase.local.xcconfig
+
+# JavaScript install/build output
+**/node_modules/
+**/dist/
+
+# Local agent/editor settings
+**/.agents/
+**/.claude/

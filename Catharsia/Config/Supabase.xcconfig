@@ -1,0 +1,7 @@
+// Catharsia's public Supabase project and tenant identifiers.
+// Keep the publishable key in the ignored Supabase.local.xcconfig file.
+SUPABASE_URL = https:/$()/olypztthdzctunsoopwi.supabase.co
+SUPABASE_PUBLISHABLE_KEY =
+KATHAR_TENANT_ID = c735a494-a9c1-432a-8d44-14d38f12f0c0
+KATHAR_MEDIA_BUCKET_ID = kathar-media
+#include? "Supabase.local.xcconfig"

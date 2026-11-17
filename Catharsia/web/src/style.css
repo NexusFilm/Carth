@@ -147,10 +147,13 @@
 
 /* Explore is a focused feed: one complete post, centered in the reading column. */
 .desktop-workspace .main-area .feed-grid:not(.saved-grid){grid-template-columns:minmax(0,1fr);width:100%;max-width:760px;margin:0 auto}
-.desktop-workspace .main-area .feed-grid:not(.saved-grid) .post-media-slide{height:clamp(300px,42vh,500px)}
+.desktop-workspace .main-area .feed-grid:not(.saved-grid) .post-media{overflow-x:auto;overflow-y:hidden;align-items:center}
+.desktop-workspace .main-area .feed-grid:not(.saved-grid) .post-media-slide{height:min(68vh,720px);min-height:380px}
+.desktop-workspace .main-area .feed-grid:not(.saved-grid) .post-media-slide img,
+.desktop-workspace .main-area .feed-grid:not(.saved-grid) .post-media-slide video{width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;object-position:center}
 .desktop-workspace .main-area .feed-grid:not(.saved-grid) .feed-content{padding:17px 20px}
 .desktop-workspace .main-area .feed-grid:not(.saved-grid) .feed-card h2{margin-top:13px}
 @media(max-width:700px){
   .desktop-workspace .main-area .feed-grid:not(.saved-grid){max-width:560px}
-  .desktop-workspace .main-area .feed-grid:not(.saved-grid) .post-media-slide{height:min(48vh,410px)}
+  .desktop-workspace .main-area .feed-grid:not(.saved-grid) .post-media-slide{height:min(62vh,620px);min-height:300px}
 }

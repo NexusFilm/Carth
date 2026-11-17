@@ -434,10 +434,12 @@
 				CODE_SIGNING_STYLE = Automatic;
 				CODE_SIGN_ENTITLEMENTS = Config/Catharsia.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = DG4DARLJ54;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Config/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Catharsia;
+				MARKETING_VERSION = 1.0;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Catharsia uses the camera so authorized therapists and administrators can create educational posts.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Catharsia uses the microphone when authorized therapists and administrators record video posts.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -583,10 +585,12 @@
 				CODE_SIGNING_STYLE = Automatic;
 				CODE_SIGN_ENTITLEMENTS = Config/Catharsia.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = DG4DARLJ54;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Config/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Catharsia;
+				MARKETING_VERSION = 1.0;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Catharsia uses the camera so authorized therapists and administrators can create educational posts.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Catharsia uses the microphone when authorized therapists and administrators record video posts.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

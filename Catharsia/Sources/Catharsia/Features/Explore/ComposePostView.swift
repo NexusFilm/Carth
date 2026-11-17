@@ -696,6 +696,7 @@ struct ComposePostView: View {
                     caption = ""
                     externalURLText = ""
                     isLinkEditorVisible = false
+                    dismiss()
                 }
             } catch {
                 if !Task.isCancelled && !error.isCatharsiaCancellation {

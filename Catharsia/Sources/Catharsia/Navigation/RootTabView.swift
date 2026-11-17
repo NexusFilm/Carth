@@ -7,7 +7,14 @@ enum CatharsiaTab: String, CaseIterable, Identifiable {
     case profile = "Profile"
 
     var id: String { rawValue }
-
+    var symbol: String {
+        switch self {
+        case .explore: "brain.head.profile"
+        case .communities: "person.3"
+        case .saved: "bookmark"
+        case .profile: "person.crop.circle"
+        }
+    }
 }
 
 struct RootTabView: View {
@@ -112,13 +119,7 @@ struct RootTabView: View {
     private var mainTabs: some View {
         TabView(selection: $selection) {
             ExploreView()
-                .tabItem {
-                    Label {
-                        Text(CatharsiaTab.explore.rawValue)
-                    } icon: {
-                        Image(systemName: "brain.head.profile")
-                    }
-                }
+                .tabItem { Label(CatharsiaTab.explore.rawValue, systemImage: CatharsiaTab.explore.symbol) }
                 .tag(CatharsiaTab.explore)
             CommunityView()
                 .tabItem { Label(CatharsiaTab.communities.rawValue, systemImage: "person.3") }
@@ -130,10 +131,12 @@ struct RootTabView: View {
                 .tabItem { Label(CatharsiaTab.profile.rawValue, systemImage: "person.crop.circle") }
                 .tag(CatharsiaTab.profile)
         }
-        .tint(CatharsiaStyle.violet)
-        .toolbarBackground(CatharsiaStyle.canvas, for: .tabBar)
-        .toolbarBackground(.visible, for: .tabBar)
-        .toolbarColorScheme(.light, for: .tabBar)
+        .toolbar(.hidden, for: .tabBar)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            CatharsiaBottomDock(
+                selection: $selection
+            )
+        }
     }
 
     private func showInAppBanner(title: String, body: String, destination: String?) {
@@ -175,6 +178,64 @@ struct RootTabView: View {
 
 extension Notification.Name {
     static let catharsiaExploreTabSelected = Notification.Name("catharsia.exploreTabSelected")
+}
+
+private struct CatharsiaBottomDock: View {
+    @Binding var selection: CatharsiaTab
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    var body: some View {
+        HStack(spacing: 4) {
+            tabButton(.explore)
+            tabButton(.communities)
+            tabButton(.saved)
+            tabButton(.profile)
+        }
+        .padding(7)
+        .frame(maxWidth: 380)
+        .background(CatharsiaStyle.canvas, in: Capsule())
+        .overlay(Capsule().stroke(.white.opacity(0.95), lineWidth: 1.2))
+        .shadow(color: CatharsiaStyle.ink.opacity(0.14), radius: 14, y: 5)
+        .padding(.horizontal, 14)
+        .padding(.top, 7)
+        .padding(.bottom, 7)
+        .frame(maxWidth: .infinity)
+        .sensoryFeedback(.selection, trigger: selection)
+    }
+
+    private func tabButton(_ tab: CatharsiaTab) -> some View {
+        let isSelected = selection == tab
+
+        return Button {
+            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
+                selection = tab
+            }
+        } label: {
+            VStack(spacing: 3) {
+                Image(systemName: tab.symbol)
+                    .font(.system(size: 18, weight: isSelected ? .semibold : .regular))
+                if !dynamicTypeSize.isAccessibilitySize {
+                    Text(tab.rawValue)
+                        .font(.caption2.weight(isSelected ? .semibold : .medium))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+            }
+            .foregroundStyle(isSelected ? .white : CatharsiaStyle.violet.opacity(0.82))
+            .frame(maxWidth: .infinity, minHeight: 52)
+            .background {
+                if isSelected {
+                    Capsule().fill(CatharsiaStyle.violet)
+                }
+            }
+            .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(tab.rawValue)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
 }
 
 private struct InAppNotificationBanner: Identifiable {

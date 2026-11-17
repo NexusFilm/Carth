@@ -36,7 +36,7 @@ struct ExploreView: View {
                                 ForEach(feed.posts) { post in
                                     FeedPostPage(
                                         post: post,
-                                        actionRail: engagementRail(for: post),
+                                        engagementActions: engagementActions(for: post),
                                         onOpen: { activeSheet = .detail(post) },
                                         onOpenBento: { activeSheet = .bento(post) },
                                         onDoubleTapLike: {
@@ -44,10 +44,10 @@ struct ExploreView: View {
                                             Task { await feed.toggleLike(postID: post.id) }
                                         }
                                     )
-                                    .frame(maxWidth: .infinity)
-                                    .aspectRatio(post.mediaItems.first?.kind == .video ? 9.0 / 16.0 : 4.0 / 5.0, contentMode: .fit)
                                     .padding(.horizontal, 14)
+                                    .frame(maxWidth: post.mediaItems.first?.kind == .video ? 500 : 640)
                                     .padding(.vertical, 4)
+                                    .frame(maxWidth: .infinity)
                                     .id(post.id)
                                     .onAppear {
                                         if post.id == feed.posts.last?.id {
@@ -289,9 +289,9 @@ struct ExploreView: View {
     }
 
     @ViewBuilder
-    private func engagementRail(for post: PublishedPost) -> some View {
-        VStack(spacing: 8) {
-            RailAction(
+    private func engagementActions(for post: PublishedPost) -> some View {
+        HStack(spacing: 2) {
+            FeedActionButton(
                 symbol: feed.likedPostIDs.contains(post.id) ? "heart.fill" : "heart",
                 label: feed.likedPostIDs.contains(post.id) ? "Unlike" : "Like",
                 count: post.likeCount,
@@ -301,10 +301,17 @@ struct ExploreView: View {
                 guard session.isSignedIn else { activeSheet = .signIn; return }
                 Task { await feed.toggleLike(postID: post.id) }
             }
-            RailAction(symbol: "bubble.right.fill", label: "Comments", count: post.commentCount) {
+            FeedActionButton(symbol: "bubble.right", label: "Comments", count: post.commentCount) {
                 activeSheet = session.isSignedIn ? .comments(post) : .signIn
             }
-            RailAction(
+            FeedActionButton(
+                symbol: "arrowshape.turn.up.right",
+                label: "Share",
+                count: post.shareCount
+            ) {
+                activeSheet = .share(post)
+            }
+            FeedActionButton(
                 symbol: feed.savedPostIDs.contains(post.id) ? "bookmark.fill" : "bookmark",
                 label: feed.savedPostIDs.contains(post.id) ? "Unsave" : "Save",
                 count: post.saveCount,
@@ -313,9 +320,6 @@ struct ExploreView: View {
             ) {
                 guard session.isSignedIn else { activeSheet = .signIn; return }
                 Task { await feed.toggleSave(postID: post.id) }
-            }
-            RailAction(symbol: "square.and.arrow.up", label: "Share", count: post.shareCount) {
-                activeSheet = .share(post)
             }
             Menu {
                 if session.isSignedIn && post.authorUserID == session.userID {
@@ -330,34 +334,18 @@ struct ExploreView: View {
                 }
             } label: {
                 Image(systemName: "ellipsis")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 30, height: 30)
-                    .background(.white.opacity(0.14), in: Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.20), lineWidth: 1))
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(CatharsiaStyle.muted)
                     .frame(width: 44, height: 44)
                     .contentShape(Circle())
             }
             .accessibilityLabel("More post actions")
         }
-        .padding(.horizontal, 5)
-        .padding(.vertical, 9)
-        .background {
-            Capsule(style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [CatharsiaStyle.ink.opacity(0.94), CatharsiaStyle.violet.opacity(0.92)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-        }
-        .overlay {
-            Capsule(style: .continuous)
-                .stroke(.white.opacity(0.22), lineWidth: 1)
-        }
-        .shadow(color: CatharsiaStyle.ink.opacity(0.22), radius: 12, y: 5)
-        .padding(.trailing, 2)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 3)
+        .frame(maxWidth: .infinity)
+        .background(CatharsiaStyle.panel)
+        .overlay(alignment: .top) { Rectangle().fill(CatharsiaStyle.ink.opacity(0.07)).frame(height: 1) }
     }
 
     private var topChrome: some View {
@@ -531,9 +519,9 @@ private enum ExploreSheet: Identifiable {
     }
 }
 
-private struct FeedPostPage<ActionRail: View>: View {
+private struct FeedPostPage<Actions: View>: View {
     let post: PublishedPost
-    let actionRail: ActionRail
+    let engagementActions: Actions
     let onOpen: () -> Void
     let onOpenBento: () -> Void
     let onDoubleTapLike: () -> Void
@@ -542,87 +530,90 @@ private struct FeedPostPage<ActionRail: View>: View {
     @State private var isVideoPausedByUser = false
 
     private var selectedMediaIndex: Int { selectedMediaPageID ?? 0 }
+    private var mediaAspectRatio: CGFloat { post.mediaItems.first?.kind == .video ? 9.0 / 16.0 : 4.0 / 5.0 }
 
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            postBackdrop
-            if post.mediaItems.isEmpty {
-                CatharsiaStyle.atmosphere.opacity(0.42)
-            }
-
-            VStack(alignment: .leading, spacing: 8) {
-                authorIdentity
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 6)
-                    .background(.white.opacity(0.88), in: Capsule())
-                    .overlay(Capsule().stroke(.white.opacity(0.82), lineWidth: 1))
-                if let conversationSignal {
-                    Label(conversationSignal, systemImage: "bubble.left.and.bubble.right.fill")
-                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                        .foregroundStyle(CatharsiaStyle.aqua)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 7)
-                        .background(.white.opacity(0.90), in: Capsule())
-                        .overlay(Capsule().stroke(CatharsiaStyle.aqua.opacity(0.18), lineWidth: 1))
-                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
+        VStack(spacing: 0) {
+            ZStack(alignment: .bottomLeading) {
+                postBackdrop
+                if post.mediaItems.isEmpty {
+                    CatharsiaStyle.atmosphere.opacity(0.42)
                 }
-                Spacer()
-            }
-            .padding(.leading, 20)
-            .padding(.trailing, 88)
-            .padding(.top, 20)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
-            VStack(alignment: .leading, spacing: 14) {
-                Spacer(minLength: 170)
-                if !post.topicName.isEmpty {
-                    Text(post.topicName.uppercased())
-                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                        .tracking(1.3)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 11)
-                        .padding(.vertical, 7)
-                        .background(CatharsiaStyle.ink.opacity(0.82), in: Capsule())
-                }
-                if !post.caption.isEmpty {
-                    Button(action: onOpen) {
-                        Text(post.caption)
-                            .font(.system(size: 26, weight: .semibold, design: .rounded))
-                            .tracking(-0.35)
-                            .multilineTextAlignment(.leading)
-                            .foregroundStyle(.white)
-                            .lineLimit(6)
-                            .shadow(color: .black.opacity(0.35), radius: 18, y: 5)
+                VStack(alignment: .leading, spacing: 8) {
+                    authorIdentity
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .background(.white.opacity(0.88), in: Capsule())
+                        .overlay(Capsule().stroke(.white.opacity(0.82), lineWidth: 1))
+                    if let conversationSignal {
+                        Label(conversationSignal, systemImage: "bubble.left.and.bubble.right.fill")
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .foregroundStyle(CatharsiaStyle.aqua)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 7)
+                            .background(.white.opacity(0.90), in: Capsule())
+                            .overlay(Capsule().stroke(CatharsiaStyle.aqua.opacity(0.18), lineWidth: 1))
+                            .transition(.opacity.combined(with: .scale(scale: 0.96)))
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityHint("Open the full post")
+                    Spacer()
                 }
+                .padding(.leading, 20)
+                .padding(.trailing, 20)
+                .padding(.top, 20)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
-                if let externalLink = post.externalLink {
-                    Link(destination: externalLink.url) {
-                        Label("Open link", systemImage: "arrow.up.right")
-                            .font(.caption.weight(.semibold))
+                VStack(alignment: .leading, spacing: 14) {
+                    Spacer(minLength: 170)
+                    if !post.topicName.isEmpty {
+                        Text(post.topicName.uppercased())
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .tracking(1.3)
                             .foregroundStyle(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
+                            .padding(.horizontal, 11)
+                            .padding(.vertical, 7)
                             .background(CatharsiaStyle.ink.opacity(0.82), in: Capsule())
                     }
-                    .accessibilityLabel("Open external link to \(externalLink.displayHost)")
-                }
+                    if !post.caption.isEmpty {
+                        Button(action: onOpen) {
+                            Text(post.caption)
+                                .font(.system(size: 26, weight: .semibold, design: .rounded))
+                                .tracking(-0.35)
+                                .multilineTextAlignment(.leading)
+                                .foregroundStyle(.white)
+                                .lineLimit(6)
+                                .shadow(color: .black.opacity(0.35), radius: 18, y: 5)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Open the full post")
+                    }
 
+                    if let externalLink = post.externalLink {
+                        Link(destination: externalLink.url) {
+                            Label("Open link", systemImage: "arrow.up.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(CatharsiaStyle.ink.opacity(0.82), in: Capsule())
+                        }
+                        .accessibilityLabel("Open external link to \(externalLink.displayHost)")
+                    }
+                }
+                .padding(.leading, 22)
+                .padding(.trailing, 22)
+                .padding(.bottom, 30)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
             }
-            .padding(.leading, 22)
-            .padding(.trailing, 84)
-            .padding(.bottom, 30)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+            .frame(maxWidth: .infinity)
+            .aspectRatio(mediaAspectRatio, contentMode: .fit)
+            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+
+            engagementActions
         }
+        .background(CatharsiaStyle.panel, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(CatharsiaStyle.ink.opacity(0.07), lineWidth: 1))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .background(CatharsiaStyle.canvas)
-        .overlay(alignment: .bottomTrailing) {
-            actionRail
-                .padding(.trailing, 12)
-                .padding(.bottom, 26)
-        }
         .onChange(of: selectedMediaPageID) { _, _ in isVideoPausedByUser = false }
         .onAppear { isVisible = true }
         .onDisappear { isVisible = false }
@@ -907,45 +898,29 @@ private struct NeuralBackdrop: View {
     }
 }
 
-private struct RailAction: View {
+private struct FeedActionButton: View {
     let symbol: String
     let label: String
-    let count: Int?
+    let count: Int
     var isActive = false
-    var activeColor = CatharsiaStyle.aqua
+    var activeColor = CatharsiaStyle.violet
     let action: () -> Void
 
     var body: some View {
-        VStack(spacing: 2) {
-            Button(action: action) {
+        Button(action: action) {
+            HStack(spacing: 5) {
                 Image(systemName: symbol)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 30, height: 30)
-                    .background(isActive ? activeColor : .white.opacity(0.14), in: Circle())
-                    .overlay(Circle().stroke(.white.opacity(isActive ? 0.46 : 0.20), lineWidth: 1))
-                    .frame(width: 44, height: 44)
-                    .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .contentShape(Circle())
-            .accessibilityLabel(count.map { "\(label), \($0.formatted())" } ?? label)
-
-            if let count {
+                    .font(.system(size: 15, weight: .medium))
                 Text(count.formatted())
-                    .font(.system(size: 9, weight: .bold, design: .rounded).monospacedDigit())
-                    .foregroundStyle(.white)
-                    .padding(.vertical, 1)
+                    .font(.system(size: 12, weight: .semibold, design: .rounded).monospacedDigit())
                     .contentTransition(.numericText())
-                    .accessibilityHidden(true)
-            } else {
-                Text(label)
-                    .font(.system(size: 9, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .padding(.vertical, 1)
-                    .accessibilityHidden(true)
             }
+            .foregroundStyle(isActive ? activeColor : CatharsiaStyle.ink)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(label), \(count.formatted())")
     }
 }
 

@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum CatharsiaTab: String, CaseIterable, Identifiable {
+enum CatharsiaTab: String, CaseIterable, Hashable, Identifiable {
     case explore = "Explore"
     case communities = "Communities"
     case saved = "Saved"
@@ -20,6 +20,7 @@ enum CatharsiaTab: String, CaseIterable, Identifiable {
 struct RootTabView: View {
     @AppStorage("hasCompletedWelcomeOnboarding") private var hasCompletedWelcomeOnboarding = false
     @State private var selection: CatharsiaTab = .explore
+    @State private var visitedTabs: Set<CatharsiaTab> = [.explore]
     @State private var inAppBanner: InAppNotificationBanner?
     @Environment(SessionStore.self) private var session
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -90,7 +91,7 @@ struct RootTabView: View {
         }
         .task { await session.restoreSession() }
         .onReceive(NotificationCenter.default.publisher(for: .catharsiaOpenNotificationCenter)) { _ in
-            selection = .explore
+            selectTab(.explore)
             Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(250))
                 NotificationCenter.default.post(name: .catharsiaPresentNotificationCenter, object: nil)
@@ -105,38 +106,49 @@ struct RootTabView: View {
             guard let rawDestination = notification.userInfo?["destination"] as? String,
                   let destination = CatharsiaAnnouncementDestination(rawValue: rawDestination) else { return }
             switch destination {
-            case .explore: selection = .explore
-            case .saved: selection = .saved
-            case .profile: selection = .profile
+            case .explore: selectTab(.explore)
+            case .saved: selectTab(.saved)
+            case .profile: selectTab(.profile)
             }
         }
         .onChange(of: selection) { _, selectedTab in
+            visitedTabs.insert(selectedTab)
             guard selectedTab == .explore else { return }
             NotificationCenter.default.post(name: .catharsiaExploreTabSelected, object: nil)
         }
     }
 
     private var mainTabs: some View {
-        TabView(selection: $selection) {
-            ExploreView()
-                .tabItem { Label(CatharsiaTab.explore.rawValue, systemImage: CatharsiaTab.explore.symbol) }
-                .tag(CatharsiaTab.explore)
-            CommunityView()
-                .tabItem { Label(CatharsiaTab.communities.rawValue, systemImage: "person.3") }
-                .tag(CatharsiaTab.communities)
-            SavedView(onExplore: { selection = .explore })
-                .tabItem { Label(CatharsiaTab.saved.rawValue, systemImage: "bookmark") }
-                .tag(CatharsiaTab.saved)
-            AccountView()
-                .tabItem { Label(CatharsiaTab.profile.rawValue, systemImage: "person.crop.circle") }
-                .tag(CatharsiaTab.profile)
+        ZStack {
+            if visitedTabs.contains(.explore) {
+                ExploreView()
+                    .tabDestination(isSelected: selection == .explore)
+            }
+            if visitedTabs.contains(.communities) {
+                CommunityView()
+                    .tabDestination(isSelected: selection == .communities)
+            }
+            if visitedTabs.contains(.saved) {
+                SavedView(onExplore: { selectTab(.explore) })
+                    .tabDestination(isSelected: selection == .saved)
+            }
+            if visitedTabs.contains(.profile) {
+                AccountView()
+                    .tabDestination(isSelected: selection == .profile)
+            }
         }
-        .toolbar(.hidden, for: .tabBar)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             CatharsiaBottomDock(
-                selection: $selection
+                selection: selection,
+                onSelect: selectTab
             )
         }
+    }
+
+    private func selectTab(_ tab: CatharsiaTab) {
+        visitedTabs.insert(tab)
+        selection = tab
     }
 
     private func showInAppBanner(title: String, body: String, destination: String?) {
@@ -176,12 +188,23 @@ struct RootTabView: View {
     }
 }
 
+private extension View {
+    func tabDestination(isSelected: Bool) -> some View {
+        self
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .opacity(isSelected ? 1 : 0)
+            .allowsHitTesting(isSelected)
+            .accessibilityHidden(!isSelected)
+    }
+}
+
 extension Notification.Name {
     static let catharsiaExploreTabSelected = Notification.Name("catharsia.exploreTabSelected")
 }
 
 private struct CatharsiaBottomDock: View {
-    @Binding var selection: CatharsiaTab
+    let selection: CatharsiaTab
+    let onSelect: (CatharsiaTab) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -210,7 +233,7 @@ private struct CatharsiaBottomDock: View {
 
         return Button {
             withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
-                selection = tab
+                onSelect(tab)
             }
         } label: {
             VStack(spacing: 3) {

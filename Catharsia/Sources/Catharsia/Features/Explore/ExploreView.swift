@@ -25,63 +25,65 @@ struct ExploreView: View {
 
                 VStack(spacing: 0) {
                     topChrome
-                    ScrollViewReader { scrollProxy in
-                        ScrollView(.vertical) {
-                            LazyVStack(spacing: 12) {
-                            if feed.posts.isEmpty {
-                                emptyFeed
-                                    .frame(minHeight: 560)
-                                    .id("empty-explore-feed")
-                            } else {
-                                ForEach(feed.posts) { post in
-                                    FeedPostPage(
-                                        post: post,
-                                        engagementActions: engagementActions(for: post),
-                                        onOpen: { activeSheet = .detail(post) },
-                                        onOpenBento: { activeSheet = .bento(post) },
-                                        onDoubleTapLike: {
-                                            guard session.isSignedIn else { activeSheet = .signIn; return }
-                                            Task { await feed.toggleLike(postID: post.id) }
-                                        }
-                                    )
-                                    .padding(.horizontal, 14)
-                                    .frame(maxWidth: post.mediaItems.first?.kind == .video ? 500 : 640)
-                                    .padding(.vertical, 4)
-                                    .frame(maxWidth: .infinity)
-                                    .id(post.id)
-                                    .onAppear {
-                                        if post.id == feed.posts.last?.id {
-                                            Task { await feed.loadMore(isSignedIn: session.isSignedIn) }
+                    GeometryReader { feedViewport in
+                        ScrollViewReader { scrollProxy in
+                            ScrollView(.vertical) {
+                                LazyVStack(spacing: 12) {
+                                    if feed.posts.isEmpty {
+                                        emptyFeed
+                                            .frame(minHeight: 560)
+                                            .id("empty-explore-feed")
+                                    } else {
+                                        ForEach(feed.posts) { post in
+                                            FeedPostPage(
+                                                post: post,
+                                                engagementActions: engagementActions(for: post),
+                                                onOpen: { activeSheet = .detail(post) },
+                                                onOpenBento: { activeSheet = .bento(post) },
+                                                onDoubleTapLike: {
+                                                    guard session.isSignedIn else { activeSheet = .signIn; return }
+                                                    Task { await feed.toggleLike(postID: post.id) }
+                                                }
+                                            )
+                                            .frame(maxWidth: feedCardWidth(in: feedViewport.size))
+                                            .padding(.horizontal, 14)
+                                            .padding(.vertical, 4)
+                                            .frame(maxWidth: .infinity)
+                                            .id(post.id)
+                                            .onAppear {
+                                                if post.id == feed.posts.last?.id {
+                                                    Task { await feed.loadMore(isSignedIn: session.isSignedIn) }
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                        }
-                        .scrollIndicators(.hidden)
-                        .scrollBounceBehavior(.always, axes: .vertical)
-                        .scrollDismissesKeyboard(.interactively)
-                        .refreshable {
-                            guard let refreshed = await feed.refreshFeed(isSignedIn: session.isSignedIn) else {
-                                return
+                            .scrollIndicators(.hidden)
+                            .scrollBounceBehavior(.always, axes: .vertical)
+                            .scrollDismissesKeyboard(.interactively)
+                            .refreshable {
+                                guard let refreshed = await feed.refreshFeed(isSignedIn: session.isSignedIn) else {
+                                    return
+                                }
+                                if refreshed {
+                                    CatharsiaRefreshChime.play()
+                                    scrollToLatest(using: scrollProxy)
+                                }
+                                showPullRefreshFeedback(refreshed ? "You're up to date" : "Couldn’t refresh. Pull to try again.")
                             }
-                            if refreshed {
-                                CatharsiaRefreshChime.play()
-                                scrollToLatest(using: scrollProxy)
+                            .onReceive(NotificationCenter.default.publisher(for: .catharsiaExploreTabSelected)) { _ in
+                                Task { await refreshLatestAndReturnToTop(using: scrollProxy) }
                             }
-                            showPullRefreshFeedback(refreshed ? "You're up to date" : "Couldn’t refresh. Pull to try again.")
-                        }
-                        .onReceive(NotificationCenter.default.publisher(for: .catharsiaExploreTabSelected)) { _ in
-                            Task { await refreshLatestAndReturnToTop(using: scrollProxy) }
-                        }
-                        .onChange(of: scenePhase) { _, phase in
-                            if phase == .background {
-                                wasBackgrounded = true
-                                return
+                            .onChange(of: scenePhase) { _, phase in
+                                if phase == .background {
+                                    wasBackgrounded = true
+                                    return
+                                }
+                                guard phase == .active, wasBackgrounded else { return }
+                                wasBackgrounded = false
+                                Task { await refreshLatestAndReturnToTop(using: scrollProxy) }
                             }
-                            guard phase == .active, wasBackgrounded else { return }
-                            wasBackgrounded = false
-                            Task { await refreshLatestAndReturnToTop(using: scrollProxy) }
                         }
                     }
                 }
@@ -288,6 +290,13 @@ struct ExploreView: View {
         }
     }
 
+    private func feedCardWidth(in viewport: CGSize) -> CGFloat {
+        let widthLimit = max(220, viewport.width - 28)
+        let availableMediaHeight = viewport.height > 0 ? max(240, viewport.height - 60) : 460
+        let heightLimit = availableMediaHeight * 4.0 / 5.0
+        return min(640, min(widthLimit, heightLimit))
+    }
+
     @ViewBuilder
     private func engagementActions(for post: PublishedPost) -> some View {
         HStack(spacing: 2) {
@@ -296,18 +305,24 @@ struct ExploreView: View {
                 label: feed.likedPostIDs.contains(post.id) ? "Unlike" : "Like",
                 count: post.likeCount,
                 isActive: feed.likedPostIDs.contains(post.id),
-                activeColor: CatharsiaStyle.coral
+                accentColor: CatharsiaStyle.coral
             ) {
                 guard session.isSignedIn else { activeSheet = .signIn; return }
                 Task { await feed.toggleLike(postID: post.id) }
             }
-            FeedActionButton(symbol: "bubble.right", label: "Comments", count: post.commentCount) {
+            FeedActionButton(
+                symbol: "bubble.right",
+                label: "Comments",
+                count: post.commentCount,
+                accentColor: CatharsiaStyle.aqua
+            ) {
                 activeSheet = session.isSignedIn ? .comments(post) : .signIn
             }
             FeedActionButton(
                 symbol: "arrowshape.turn.up.right",
                 label: "Share",
-                count: post.shareCount
+                count: post.shareCount,
+                accentColor: CatharsiaStyle.violet
             ) {
                 activeSheet = .share(post)
             }
@@ -316,7 +331,7 @@ struct ExploreView: View {
                 label: feed.savedPostIDs.contains(post.id) ? "Unsave" : "Save",
                 count: post.saveCount,
                 isActive: feed.savedPostIDs.contains(post.id),
-                activeColor: CatharsiaStyle.violet
+                accentColor: CatharsiaStyle.violet
             ) {
                 guard session.isSignedIn else { activeSheet = .signIn; return }
                 Task { await feed.toggleSave(postID: post.id) }
@@ -530,7 +545,7 @@ private struct FeedPostPage<Actions: View>: View {
     @State private var isVideoPausedByUser = false
 
     private var selectedMediaIndex: Int { selectedMediaPageID ?? 0 }
-    private var mediaAspectRatio: CGFloat { post.mediaItems.first?.kind == .video ? 9.0 / 16.0 : 4.0 / 5.0 }
+    private var mediaAspectRatio: CGFloat { 4.0 / 5.0 }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -903,7 +918,7 @@ private struct FeedActionButton: View {
     let label: String
     let count: Int
     var isActive = false
-    var activeColor = CatharsiaStyle.violet
+    var accentColor = CatharsiaStyle.violet
     let action: () -> Void
 
     var body: some View {
@@ -911,11 +926,14 @@ private struct FeedActionButton: View {
             HStack(spacing: 5) {
                 Image(systemName: symbol)
                     .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(accentColor)
+                    .frame(width: 31, height: 31)
+                    .background(accentColor.opacity(0.12), in: Circle())
                 Text(count.formatted())
                     .font(.system(size: 12, weight: .semibold, design: .rounded).monospacedDigit())
                     .contentTransition(.numericText())
+                    .foregroundStyle(isActive ? accentColor : CatharsiaStyle.muted)
             }
-            .foregroundStyle(isActive ? activeColor : CatharsiaStyle.ink)
             .frame(maxWidth: .infinity, minHeight: 44)
             .contentShape(Rectangle())
         }

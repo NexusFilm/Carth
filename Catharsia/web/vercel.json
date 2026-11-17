@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/communities", "destination": "/index.html" },
+    { "source": "/explore", "destination": "/index.html" },
+    { "source": "/host", "destination": "/index.html" },
+    { "source": "/community/:id", "destination": "/index.html" }
+  ]
+}

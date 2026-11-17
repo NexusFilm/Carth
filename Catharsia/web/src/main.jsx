@@ -19,6 +19,10 @@ const config = {
 const client = config.url && config.key ? createClient(config.url, config.key) : null
 const communityFields = 'id,name,topic,description,cover_url,members,member_limit,professional_id,owner_user_id,guidelines,created_at'
 const formatDate = value => value ? new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(new Date(value)) : ''
+const mediaURL = value => {
+  if (!value || /^(https?:|blob:|data:)/i.test(value)) return value
+  return client?.storage.from('kathar-media').getPublicUrl(value.replace(/^\/+/, '')).data.publicUrl || value
+}
 
 function App() {
   const [session, setSession] = useState(null)
@@ -29,6 +33,7 @@ function App() {
   const [memberships, setMemberships] = useState([])
   const [posts, setPosts] = useState([])
   const [feed, setFeed] = useState([])
+  const [directoryError, setDirectoryError] = useState('')
   const initialCommunity = window.location.pathname.match(/^\/community\/([0-9a-f-]+)$/i)?.[1] || new URLSearchParams(window.location.search).get('community')
   const [selectedCommunityId, setSelectedCommunityId] = useState(initialCommunity)
   const [section, setSection] = useState(initialCommunity ? 'community' : window.location.pathname === '/communities' ? 'communities' : 'explore')
@@ -61,8 +66,10 @@ function App() {
     const { data, error } = await client.from('kathar_communities')
       .select(communityFields).eq('tenant_id', config.tenant)
       .order('members', { ascending: false }).order('created_at', { ascending: false })
+      .abortSignal(AbortSignal.timeout(12000))
     if (error) throw error
     setCommunities(data || [])
+    setDirectoryError('')
   }, [])
 
   const loadViewer = useCallback(async activeSession => {
@@ -91,11 +98,17 @@ function App() {
     if (!client || !config.tenant) { setLoading(false); return }
     setLoading(true)
     try {
-      await loadDirectory()
+      try {
+        await loadDirectory()
+      } catch (error) {
+        setDirectoryError(error.message || 'Couldn’t load communities.')
+        throw error
+      }
       const { data, error } = await client.from('kathar_posts')
-        .select('id,title,summary,body,format,topics,link_url,cover_url,media_url,author_name,author_credentials,created_at,likes,comment_count')
+        .select('id,title,summary,body,format,topics,link_url,cover_url,media_url,media_items,author_name,author_credentials,created_at,likes,comment_count')
         .eq('tenant_id', config.tenant).eq('is_mock', false).eq('is_test', false)
         .order('created_at', { ascending: false }).limit(25)
+        .abortSignal(AbortSignal.timeout(12000))
       if (error) throw error
       setFeed(data || [])
     } catch (error) {
@@ -274,7 +287,7 @@ function App() {
       {section === 'explore' && <ExplorePage feed={feed} loading={loading} onBrowse={() => goSection('communities')} />}
       {section === 'communities' && <CommunityDirectory
         communities={visibleCommunities} myGroups={myGroups} query={query} setQuery={setQuery} loading={loading}
-        signedIn={!!session} onOpen={openCommunity} onSignIn={() => setIsAuthOpen(true)} />}
+        error={directoryError} onRetry={loadPageData} signedIn={!!session} onOpen={openCommunity} onSignIn={() => setIsAuthOpen(true)} />}
       {section === 'community' && selectedCommunity && <CommunityPage
         group={selectedCommunity} posts={posts} session={session} isHost={userOwnsSelected || isAdmin}
         joined={memberships.some(row => row.community_id === selectedCommunity.id)} onBack={() => goSection('communities')}
@@ -282,7 +295,8 @@ function App() {
         onSignIn={() => setIsAuthOpen(true)} onPublish={form => publishCommunityPost(selectedCommunity, form)}
         onDeletePost={deleteCommunityPost} notify={notify} />}
       {section === 'community' && !selectedCommunity && <CommunityDirectory communities={visibleCommunities} myGroups={myGroups}
-        query={query} setQuery={setQuery} loading={loading} signedIn={!!session} onOpen={openCommunity} onSignIn={() => setIsAuthOpen(true)} />}
+        query={query} setQuery={setQuery} loading={loading} error={directoryError} onRetry={loadPageData}
+        signedIn={!!session} onOpen={openCommunity} onSignIn={() => setIsAuthOpen(true)} />}
       {section === 'host' && <HostStudio communities={myGroups.filter(group => group.owner_user_id === session?.user?.id || isAdmin)}
         canHost={canHost} session={session} onCreate={() => setIsCreateOpen(true)} onOpen={openCommunity}
         onSave={saveCommunity} onShare={notify} baseURL={config.publicBase} />}
@@ -315,7 +329,7 @@ function ExplorePage({ feed, loading, onBrowse }) {
     <ValueStatement icon={HeartHandshake} title="Useful voices, in a calmer feed" text="Explore therapist-led ideas at your own pace, then keep learning together in a community." />
     {loading ? <div className="loading-state">Gathering the latest posts…</div> : feed.length === 0 ? <div className="empty-panel"><Brain size={30} /><h2>Your next useful thought is coming</h2><p>New therapist perspectives will appear here as they’re shared.</p><button className="button button-outline" onClick={onBrowse}>Explore communities <ArrowRight size={16} /></button></div> :
       <div className="feed-grid">{feed.map(post => <article className="feed-card" key={post.id}>
-        {(post.cover_url || post.media_url) && <img className="feed-image" src={post.cover_url || post.media_url} alt="" />}
+        <PostMedia post={post} />
         <div className="feed-content"><div className="feed-author"><span className="small-avatar"><Brain size={15} /></span><div><b>{post.author_name || 'Catharsia therapist'}</b><small>{post.author_credentials || 'Verified therapist'} · {formatDate(post.created_at)}</small></div><BadgeCheck className="verified-mark" size={17} /></div>
           <h2>{post.title || post.summary || post.body || 'A note for today'}</h2>{post.body && post.body !== post.title && <p>{post.body}</p>}
           <div className="post-meta"><span><HeartHandshake size={15} /> {post.likes || 0} appreciations</span><span><MessageCircle size={15} /> {post.comment_count || 0} conversations</span></div>
@@ -324,13 +338,32 @@ function ExplorePage({ feed, loading, onBrowse }) {
   </>
 }
 
-function CommunityDirectory({ communities, myGroups, query, setQuery, loading, signedIn, onOpen, onSignIn }) {
+function PostMedia({ post }) {
+  const entries = (Array.isArray(post.media_items) ? post.media_items : [])
+    .filter(item => item && (item.path || item.url))
+  const items = entries.length ? entries : [post.cover_url || post.media_url].filter(Boolean).map(path => ({ path }))
+  if (!items.length) return null
+  return <div className="post-media" aria-label={items.length > 1 ? `Post media, ${items.length} items` : 'Post media'}>
+    {items.map((item, index) => {
+      const src = mediaURL(item.url || item.path)
+      const isVideo = item.kind === 'video' || item.mime_type?.startsWith('video/') || item.type === 'video'
+      return <div className="post-media-slide" key={`${src}-${index}`}>
+        {isVideo ? <video src={src} controls playsInline preload="metadata" aria-label={`Post video ${index + 1}`} /> :
+          <img src={src} alt={items.length > 1 ? `Post image ${index + 1} of ${items.length}` : 'Post image'} loading="lazy" />}
+      </div>
+    })}
+    {items.length > 1 && <span className="post-media-count">1 / {items.length}</span>}
+  </div>
+}
+
+function CommunityDirectory({ communities, myGroups, query, setQuery, loading, error, onRetry, signedIn, onOpen, onSignIn }) {
   return <>
     <PageHeading eyebrow="Support, with people who get it" title="Communities" description="Therapist-guided spaces built around shared needs, conversation, and helpful resources." action={signedIn ? <span className="counter-chip"><Users size={15} /> {myGroups.length} joined</span> : null} />
     <ValueStatement icon={Users} title="A place to feel less alone" text="Join a small, guided circle to learn together, share at your pace, and find resources curated for the group." />
     <div className="directory-tools"><div className="search-box"><Search size={17} /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search by topic or name" /></div>
       {!signedIn && <button className="text-button" onClick={onSignIn}>Sign in to join <ArrowUpRight size={15} /></button>}</div>
-    {loading ? <div className="loading-state">Finding communities…</div> : communities.length === 0 ? <div className="empty-panel"><Users size={30} /><h2>More circles are on the way</h2><p>Verified therapists will open groups as they are ready to welcome people.</p></div> :
+    {loading ? <div className="loading-state" role="status" aria-live="polite">Finding communities…</div> : error ?
+      <div className="error-panel" role="alert"><div><h2>Communities couldn’t load</h2><p>{error}</p></div><button className="button button-outline button-small" onClick={onRetry}>Try again</button></div> : communities.length === 0 ? <div className="empty-panel"><Users size={30} /><h2>No communities yet</h2><p>There aren’t any communities available right now. Please check back soon.</p></div> :
       <div className="community-grid">{communities.map((group, index) => <CommunityTile key={group.id} group={group} index={index} onClick={() => onOpen(group)} />)}</div>}
   </>
 }
@@ -377,7 +410,7 @@ function CommunityPage({ group, posts, session, isHost, joined, onBack, onJoin, 
     <div className="community-detail-grid">
       <section className="community-main-col">
         <div className="community-cover">
-          {group.cover_url ? <img src={group.cover_url} alt="" /> : <div className="cover-art"><div className="cover-orb"/><Users size={38} /></div>}
+          {group.cover_url ? <img src={mediaURL(group.cover_url)} alt="" /> : <div className="cover-art"><div className="cover-orb"/><Users size={38} /></div>}
           <div className="cover-caption"><span>{group.topic}</span><h1>{group.name}</h1></div>
         </div>
         <div className="detail-value"><div className="eyebrow">What this space is for</div><p>{group.description || 'A therapist-guided place to connect around a shared experience and find practical resources.'}</p></div>

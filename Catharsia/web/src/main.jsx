@@ -308,10 +308,7 @@ function App() {
         <span><b>Catharsia</b><small>EXPLORE</small></span>
       </a>
       <nav className="topnav" aria-label="Main navigation">
-        <button className={section === 'explore' ? 'active' : ''} onClick={() => goSection('explore')}><Sparkles size={16} /> Explore</button>
-        <button className={section === 'saved' ? 'active' : ''} onClick={() => goSection('saved')}><Bookmark size={16} /> Saved</button>
-        <button className={['communities', 'community'].includes(section) ? 'active' : ''} onClick={() => goSection('communities')}><Users size={16} /> Communities</button>
-        <button className={section === 'profile' ? 'active' : ''} onClick={() => goSection('profile')}><UserRound size={16} /> Profile</button>
+        <SidebarNav section={section} onNavigate={goSection} />
       </nav>
       {session ? <div className="user-menu">
         <button className="user-avatar-button" onClick={() => goSection('profile')} aria-label="Open profile"><UserAvatar session={session} /></button>
@@ -320,7 +317,26 @@ function App() {
       </div> : <button className="button button-outline button-small" onClick={() => setIsAuthOpen(true)}>Sign in</button>}
     </header>
 
-    <main className="main-area">
+    <div className="desktop-workspace">
+      <aside className="workspace-sidebar" aria-label="Catharsia navigation and your spaces">
+        <SidebarNav section={section} onNavigate={goSection} />
+        <div className="sidebar-divider" />
+        <div className="sidebar-section-label">YOUR SPACES</div>
+        {session && myGroups.length ? <div className="sidebar-groups">{myGroups.slice(0, 5).map(group =>
+          <button key={group.id} className="sidebar-group" onClick={() => openCommunity(group)} title={group.name}>
+            <span className="sidebar-group-mark"><Users size={14} /></span><span>{group.name}</span>
+          </button>)}</div> : <p className="sidebar-empty">{session ? 'Groups you join will appear here.' : 'Sign in to keep your communities close.'}</p>}
+        <button className="sidebar-link" onClick={() => goSection('communities')}><Plus size={15} /> Find a community</button>
+        {canHost && <button className="sidebar-host-link" onClick={() => { setCommunityMode('manage'); goSection('communities') }}><Settings2 size={15} /> Manage groups <ArrowRight size={14} /></button>}
+        <div className="sidebar-bottom">
+          <div className="sidebar-divider" />
+          {session ? <button className="sidebar-account" onClick={() => goSection('profile')}>
+            <UserAvatar session={session} /><span><b>{session.user.user_metadata?.display_name || session.user.user_metadata?.full_name || 'Your profile'}</b><small>{isAdmin ? 'Catharsia admin' : canHost ? 'Verified host' : 'Member account'}</small></span><ArrowRight size={14} />
+          </button> : <button className="sidebar-signin" onClick={() => setIsAuthOpen(true)}><LogIn size={15} /> Sign in to interact</button>}
+        </div>
+      </aside>
+
+      <main className="main-area">
       {section === 'explore' && <ExplorePage feed={feed} loading={loading} session={session} likedIDs={likedIDs} savedIDs={savedIDs}
         onLike={toggleLiked} onSave={toggleSaved} onBrowse={() => goSection('communities')} onSignIn={() => setIsAuthOpen(true)} />}
       {section === 'saved' && <SavedPage session={session} revision={savedRevision} onSignIn={() => setIsAuthOpen(true)} onExplore={() => goSection('explore')} onSave={toggleSaved}
@@ -342,7 +358,10 @@ function App() {
         onCreate={() => setIsCreateOpen(true)} onSave={saveCommunity} onShare={notify} baseURL={config.publicBase} session={session} isAdmin={isAdmin} />}
       {section === 'profile' && <ProfilePage session={session} isAdmin={isAdmin} panel={profilePanel} setPanel={setProfilePanel}
         onSignIn={() => setIsAuthOpen(true)} onSignOut={signOut} notify={notify} />}
-    </main>
+      </main>
+      <ContextSidebar section={section} selectedCommunity={selectedCommunity} session={session} canHost={canHost} isAdmin={isAdmin}
+        myGroups={myGroups} onNavigate={goSection} onOpenCommunity={openCommunity} onManage={() => { setCommunityMode('manage'); goSection('communities') }} />
+    </div>
     <footer className="footnote"><span>Therapist-led support, built around real conversation.</span><span>Community spaces are not a substitute for individual care.</span></footer>
 
     {isAuthOpen && <AuthModal email={authEmail} setEmail={setAuthEmail} message={authMessage} setMessage={setAuthMessage}
@@ -350,6 +369,52 @@ function App() {
     {isCreateOpen && <CreateModal onClose={() => setIsCreateOpen(false)} onCreate={createCommunity} />}
     {toast && <div className="toast"><Check size={17} />{toast}</div>}
   </div>
+}
+
+function SidebarNav({ section, onNavigate }) {
+  const items = [
+    ['explore', 'Explore', Sparkles], ['saved', 'Saved', Bookmark], ['communities', 'Communities', Users], ['profile', 'Profile', UserRound],
+  ]
+  return <>{items.map(([key, label, Icon]) => <button key={key} className={`sidebar-nav-item ${section === key || key === 'communities' && section === 'community' ? 'active' : ''}`}
+    aria-current={section === key || key === 'communities' && section === 'community' ? 'page' : undefined} onClick={() => onNavigate(key)}>
+    <Icon size={17} /><span>{label}</span></button>)}</>
+}
+
+function ContextSidebar({ section, selectedCommunity, session, canHost, isAdmin, myGroups, onNavigate, onOpenCommunity, onManage }) {
+  if (section === 'community' && selectedCommunity) return <aside className="context-sidebar" aria-label="Community details">
+    <div className="context-card context-community"><div className="eyebrow">COMMUNITY</div><h2>{selectedCommunity.name}</h2>
+      <p>{selectedCommunity.description || 'A shared space for support, conversation, and helpful resources.'}</p>
+      <button className="context-action" onClick={() => onNavigate('communities')}><ArrowLeft size={14} /> All communities</button>
+    </div>
+    {selectedCommunity.guidelines && <div className="context-card"><div className="context-card-title"><ShieldCheck size={16} /><b>Group guidelines</b></div><p>{selectedCommunity.guidelines}</p></div>}
+  </aside>
+  return <aside className="context-sidebar" aria-label="Helpful links and account context">
+    {section === 'explore' && <>
+      <div className="context-card context-feature"><span className="context-icon"><HeartHandshake size={18} /></span><div className="eyebrow">A SPACE TO BE HEARD</div>
+        <h2>Support can start with a conversation.</h2><p>Explore therapist-created posts and find a community when you’re ready.</p>
+        <button className="context-action" onClick={() => onNavigate('communities')}>Explore communities <ArrowRight size={14} /></button>
+      </div>
+      <div className="context-card"><div className="context-card-title"><Bookmark size={16} /><b>Keep what helps</b></div><p>Save a post to return to it later.</p><button className="context-text-link" onClick={() => onNavigate('saved')}>Open Saved <ArrowRight size={14} /></button></div>
+    </>}
+    {section === 'saved' && <div className="context-card context-feature"><span className="context-icon"><Bookmark size={18} /></span><div className="eyebrow">YOUR PRIVATE SHELF</div>
+      <h2>Return to something that helped.</h2><p>Your saved posts are private to your account.</p><button className="context-action" onClick={() => onNavigate('explore')}>Back to Explore <ArrowRight size={14} /></button></div>}
+    {section === 'communities' && <>
+      <div className="context-card context-feature"><span className="context-icon"><Users size={18} /></span><div className="eyebrow">COMMUNITIES</div>
+        <h2>Support takes shape together.</h2><p>Join a therapist-led group for ongoing conversation and curated resources.</p>
+        {canHost && <button className="context-action" onClick={onManage}>Manage your groups <ArrowRight size={14} /></button>}
+      </div>
+      <div className="context-card"><div className="context-card-title"><Users size={16} /><b>Your communities</b></div>
+        {myGroups.length ? myGroups.slice(0, 4).map(group => <button key={group.id} className="context-group-link" onClick={() => onOpenCommunity(group)}>{group.name}<ArrowRight size={13} /></button>) : <p>{session ? 'Join a community and it will appear here.' : 'Sign in when you’re ready to join a community.'}</p>}
+      </div>
+    </>}
+    {section === 'profile' && <>
+      <div className="context-card context-feature"><span className="context-icon"><UserRound size={18} /></span><div className="eyebrow">YOUR ACCOUNT</div>
+        <h2>Make your profile yours.</h2><p>Update your photo, display name, username, and bio from this page.</p>
+      </div>
+      {isAdmin && <div className="context-card context-admin"><div className="context-card-title"><ShieldCheck size={16} /><b>Admin tools</b></div><p>View tenant activity and verification requests.</p><button className="context-action" onClick={() => onNavigate('profile')}>Open Admin in Profile <ArrowRight size={14} /></button></div>}
+    </>}
+    {section === 'community' && <div className="context-card"><div className="context-card-title"><Users size={16} /><b>Explore groups</b></div><p>Find a community that fits what you need.</p><button className="context-action" onClick={() => onNavigate('communities')}>All communities <ArrowRight size={14} /></button></div>}
+  </aside>
 }
 
 function SetupMessage() {

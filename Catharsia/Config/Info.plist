@@ -37,6 +37,13 @@
 	<string>Catharsia uses the camera so authorized therapists and administrators can create educational posts.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Catharsia uses the microphone when authorized therapists and administrators record video posts.</string>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
 	<key>SUPABASE_AUTH_REDIRECT_URL</key>
 	<string>com.catharsia.ios://login-callback</string>
 	<key>SUPABASE_PUBLISHABLE_KEY</key>

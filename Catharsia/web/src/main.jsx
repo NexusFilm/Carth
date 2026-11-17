@@ -4,9 +4,9 @@ import { createClient } from '@supabase/supabase-js'
 import { QRCodeSVG } from 'qrcode.react'
 import {
   ArrowDownRight, ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, BookOpenText,
-  Brain, Check, ChevronDown, CircleUserRound, Copy, ExternalLink, HeartHandshake,
-  Link2, LogIn, MessageCircle, MoreHorizontal, Plus, Search, Settings2, Share2,
-  ShieldCheck, Sparkles, Users, X,
+  Bookmark, Brain, Check, ChevronDown, CircleUserRound, Copy, ExternalLink,
+  Heart, HeartHandshake, Link2, LogIn, MessageCircle, MoreHorizontal, Plus,
+  Search, Settings2, Share2, ShieldCheck, Sparkles, UserRound, Users, X,
 } from 'lucide-react'
 import './style.css'
 
@@ -36,7 +36,13 @@ function App() {
   const [directoryError, setDirectoryError] = useState('')
   const initialCommunity = window.location.pathname.match(/^\/community\/([0-9a-f-]+)$/i)?.[1] || new URLSearchParams(window.location.search).get('community')
   const [selectedCommunityId, setSelectedCommunityId] = useState(initialCommunity)
-  const [section, setSection] = useState(initialCommunity ? 'community' : window.location.pathname === '/communities' ? 'communities' : 'explore')
+  const initialPath = window.location.pathname.replace(/\/$/, '')
+  const [section, setSection] = useState(initialCommunity ? 'community' : ['saved', 'communities', 'profile'].includes(initialPath.slice(1)) ? initialPath.slice(1) : 'explore')
+  const [communityMode, setCommunityMode] = useState('discover')
+  const [profilePanel, setProfilePanel] = useState('profile')
+  const [savedIDs, setSavedIDs] = useState([])
+  const [likedIDs, setLikedIDs] = useState([])
+  const [savedRevision, setSavedRevision] = useState(0)
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [authEmail, setAuthEmail] = useState('')
@@ -74,7 +80,7 @@ function App() {
 
   const loadViewer = useCallback(async activeSession => {
     if (!client || !activeSession?.user) {
-      setMemberships([]); setCanHost(false); setIsAdmin(false); return
+      setMemberships([]); setCanHost(false); setIsAdmin(false); setSavedIDs([]); setLikedIDs([]); return
     }
     const userId = activeSession.user.id
     await client.rpc('kathar_ensure_current_user')
@@ -89,9 +95,15 @@ function App() {
       .in('verification_tier', ['verified_clinician', 'verified_professional']).limit(5)
     if (professionalError && !admin) throw professionalError
     const adminValue = admin === true
+    const [{ data: saved }, { data: liked }] = await Promise.all([
+      client.from('kathar_saved_items').select('target_id').eq('tenant_id', config.tenant).eq('viewer_id', userId).eq('kind', 'post').limit(200),
+      client.from('kathar_post_likes').select('post_id').eq('tenant_id', config.tenant).eq('user_id', userId).limit(200),
+    ])
     setMemberships(joined || [])
     setIsAdmin(adminValue)
     setCanHost(adminValue || (professionals || []).length > 0)
+    setSavedIDs((saved || []).map(row => row.target_id))
+    setLikedIDs((liked || []).map(row => row.post_id))
   }, [])
 
   const loadPageData = useCallback(async () => {
@@ -160,10 +172,11 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
   const goSection = target => {
-    setSection(target)
+    const next = target === 'host' ? 'communities' : target
+    setSection(next)
     setSelectedCommunityId(null)
     const url = new URL(window.location.href)
-    url.pathname = target === 'community' ? '/communities' : `/${target}`
+    url.pathname = next === 'community' ? '/communities' : `/${next}`
     url.search = ''
     window.history.pushState({}, '', url)
   }
@@ -171,7 +184,8 @@ function App() {
     const onPop = () => {
       const match = window.location.pathname.match(/^\/community\/([0-9a-f-]+)$/i)
       setSelectedCommunityId(match?.[1] || new URLSearchParams(window.location.search).get('community'))
-      setSection(match ? 'community' : window.location.pathname === '/communities' ? 'communities' : 'explore')
+      const path = window.location.pathname.replace(/\/$/, '').slice(1)
+      setSection(match ? 'community' : ['saved', 'communities', 'profile'].includes(path) ? path : 'explore')
     }
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
@@ -187,7 +201,29 @@ function App() {
     const { error } = await client.auth.signInWithOtp({ email: authEmail, options: { emailRedirectTo: window.location.origin } })
     setAuthMessage(error ? error.message : 'Check your email for a secure sign-in link.')
   }
-  const signOut = async () => { await client.auth.signOut(); setIsAuthOpen(false); notify('Signed out.') }
+  const signOut = async () => { await client.auth.signOut(); setIsAuthOpen(false); goSection('explore'); notify('Signed out.') }
+
+  const toggleSaved = async post => {
+    if (!session) { setIsAuthOpen(true); return }
+    const isSaved = savedIDs.includes(post.id)
+    const { error } = isSaved
+      ? await client.from('kathar_saved_items').delete().eq('tenant_id', config.tenant).eq('viewer_id', session.user.id).eq('kind', 'post').eq('target_id', post.id)
+      : await client.from('kathar_saved_items').upsert({ tenant_id: config.tenant, viewer_id: session.user.id, kind: 'post', target_id: post.id },
+        { onConflict: 'viewer_id,kind,target_id', ignoreDuplicates: true })
+    if (error) { notify(error.message || 'Couldn’t update saved posts.'); return }
+    setSavedIDs(current => isSaved ? current.filter(id => id !== post.id) : [...current, post.id])
+    setSavedRevision(value => value + 1)
+    notify(isSaved ? 'Removed from Saved.' : 'Saved for later.')
+  }
+
+  const toggleLiked = async post => {
+    if (!session) { setIsAuthOpen(true); return }
+    const isLiked = likedIDs.includes(post.id)
+    const { data: likes, error } = await client.rpc('kathar_toggle_post_like', { p_post_id: post.id, p_liked: isLiked })
+    if (error) { notify(error.message || 'Couldn’t update this appreciation.'); return }
+    setLikedIDs(current => isLiked ? current.filter(id => id !== post.id) : [...current, post.id])
+    if (typeof likes === 'number') setFeed(current => current.map(item => item.id === post.id ? { ...item, likes } : item))
+  }
 
   const joinCommunity = async group => {
     if (!session) { setIsAuthOpen(true); return }
@@ -230,7 +266,7 @@ function App() {
       owner_user_id: session.user.id, is_mock: false,
     })
     if (error) throw error
-    await loadDirectory(); setIsCreateOpen(false); goSection('host'); notify('Community created.')
+    await loadDirectory(); setIsCreateOpen(false); setCommunityMode('manage'); goSection('communities'); notify('Community created.')
   }
   const saveCommunity = async (group, changes) => {
     const { error } = await client.from('kathar_communities').update({ ...changes, updated_at: new Date().toISOString() })
@@ -268,38 +304,44 @@ function App() {
   return <div className="app-shell">
     <header className="topbar">
       <a className="brand" href="/" onClick={e => { e.preventDefault(); goSection('explore') }}>
-        <span className="brand-mark"><Brain size={21} strokeWidth={2.4} /></span>
-        <span><b>Catharsia</b><small>COMMUNITY</small></span>
+        <img className="brand-logo" src="/catharsia-mark.png" alt="" />
+        <span><b>Catharsia</b><small>EXPLORE</small></span>
       </a>
       <nav className="topnav" aria-label="Main navigation">
         <button className={section === 'explore' ? 'active' : ''} onClick={() => goSection('explore')}><Sparkles size={16} /> Explore</button>
+        <button className={section === 'saved' ? 'active' : ''} onClick={() => goSection('saved')}><Bookmark size={16} /> Saved</button>
         <button className={['communities', 'community'].includes(section) ? 'active' : ''} onClick={() => goSection('communities')}><Users size={16} /> Communities</button>
-        {canHost && <button className={section === 'host' ? 'active' : ''} onClick={() => goSection('host')}><Settings2 size={16} /> Host studio</button>}
+        <button className={section === 'profile' ? 'active' : ''} onClick={() => goSection('profile')}><UserRound size={16} /> Profile</button>
       </nav>
       {session ? <div className="user-menu">
-        <div className="user-avatar">{(session.user.user_metadata?.full_name || session.user.email || 'C').slice(0, 1).toUpperCase()}</div>
+        <button className="user-avatar-button" onClick={() => goSection('profile')} aria-label="Open profile"><UserAvatar session={session} /></button>
         <span className="user-email">{session.user.email}</span>
         <button className="icon-button" aria-label="Sign out" title="Sign out" onClick={signOut}><LogIn size={17} className="flip-icon" /></button>
       </div> : <button className="button button-outline button-small" onClick={() => setIsAuthOpen(true)}>Sign in</button>}
     </header>
 
     <main className="main-area">
-      {section === 'explore' && <ExplorePage feed={feed} loading={loading} onBrowse={() => goSection('communities')} />}
-      {section === 'communities' && <CommunityDirectory
+      {section === 'explore' && <ExplorePage feed={feed} loading={loading} session={session} likedIDs={likedIDs} savedIDs={savedIDs}
+        onLike={toggleLiked} onSave={toggleSaved} onBrowse={() => goSection('communities')} onSignIn={() => setIsAuthOpen(true)} />}
+      {section === 'saved' && <SavedPage session={session} revision={savedRevision} onSignIn={() => setIsAuthOpen(true)} onExplore={() => goSection('explore')} onSave={toggleSaved}
+        savedIDs={savedIDs} likedIDs={likedIDs} onLike={toggleLiked} />}
+      {section === 'communities' && <CommunitiesHub
         communities={visibleCommunities} myGroups={myGroups} query={query} setQuery={setQuery} loading={loading}
-        error={directoryError} onRetry={loadPageData} signedIn={!!session} onOpen={openCommunity} onSignIn={() => setIsAuthOpen(true)} />}
+        error={directoryError} onRetry={loadPageData} signedIn={!!session} onOpen={openCommunity} onSignIn={() => setIsAuthOpen(true)}
+        canHost={canHost} mode={communityMode} setMode={setCommunityMode} onCreate={() => setIsCreateOpen(true)}
+        onSave={saveCommunity} onShare={notify} baseURL={config.publicBase} session={session} isAdmin={isAdmin} />}
       {section === 'community' && selectedCommunity && <CommunityPage
         group={selectedCommunity} posts={posts} session={session} isHost={userOwnsSelected || isAdmin}
         joined={memberships.some(row => row.community_id === selectedCommunity.id)} onBack={() => goSection('communities')}
         onJoin={() => joinCommunity(selectedCommunity)} onLeave={() => leaveCommunity(selectedCommunity)}
         onSignIn={() => setIsAuthOpen(true)} onPublish={form => publishCommunityPost(selectedCommunity, form)}
         onDeletePost={deleteCommunityPost} notify={notify} />}
-      {section === 'community' && !selectedCommunity && <CommunityDirectory communities={visibleCommunities} myGroups={myGroups}
-        query={query} setQuery={setQuery} loading={loading} error={directoryError} onRetry={loadPageData}
-        signedIn={!!session} onOpen={openCommunity} onSignIn={() => setIsAuthOpen(true)} />}
-      {section === 'host' && <HostStudio communities={myGroups.filter(group => group.owner_user_id === session?.user?.id || isAdmin)}
-        canHost={canHost} session={session} onCreate={() => setIsCreateOpen(true)} onOpen={openCommunity}
-        onSave={saveCommunity} onShare={notify} baseURL={config.publicBase} />}
+      {section === 'community' && !selectedCommunity && <CommunitiesHub communities={visibleCommunities} myGroups={myGroups}
+        query={query} setQuery={setQuery} loading={loading} error={directoryError} onRetry={loadPageData} signedIn={!!session}
+        onOpen={openCommunity} onSignIn={() => setIsAuthOpen(true)} canHost={canHost} mode={communityMode} setMode={setCommunityMode}
+        onCreate={() => setIsCreateOpen(true)} onSave={saveCommunity} onShare={notify} baseURL={config.publicBase} session={session} isAdmin={isAdmin} />}
+      {section === 'profile' && <ProfilePage session={session} isAdmin={isAdmin} panel={profilePanel} setPanel={setProfilePanel}
+        onSignIn={() => setIsAuthOpen(true)} onSignOut={signOut} notify={notify} />}
     </main>
     <footer className="footnote"><span>Therapist-led support, built around real conversation.</span><span>Community spaces are not a substitute for individual care.</span></footer>
 
@@ -312,7 +354,7 @@ function App() {
 
 function SetupMessage() {
   return <main className="setup-screen"><span className="brand-mark"><Brain size={24} /></span><h1>Connect the Catharsia project</h1>
-    <p>Add the existing Supabase project URL, publishable key, and tenant ID to <code>web/.env.local</code> to open the host workspace.</p></main>
+    <p>Add the existing Supabase project URL, publishable key, and tenant ID to <code>.env.local</code> to open Catharsia.</p></main>
 }
 
 function PageHeading({ eyebrow, title, description, action }) {
@@ -323,17 +365,239 @@ function ValueStatement({ icon: Icon, title, text }) {
   return <div className="value-statement"><span className="value-icon"><Icon size={19} /></span><div><b>{title}</b><p>{text}</p></div></div>
 }
 
-function ExplorePage({ feed, loading, onBrowse }) {
+function UserAvatar({ session }) {
+  const label = session?.user?.user_metadata?.display_name || session?.user?.user_metadata?.full_name || session?.user?.email || 'Member'
+  const [photo, setPhoto] = useState(session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || '')
+  useEffect(() => {
+    let active = true
+    if (!session?.user?.id) { setPhoto(''); return }
+    setPhoto(session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || '')
+    client.from('kathar_profiles').select('photo_url').eq('tenant_id', config.tenant).eq('id', session.user.id).maybeSingle()
+      .then(({ data }) => { if (active && data?.photo_url) setPhoto(data.photo_url) })
+    return () => { active = false }
+  }, [session?.user?.id])
+  return photo ? <img className="user-avatar" src={photo} alt="" /> : <span className="user-avatar">{label.slice(0, 1).toUpperCase()}</span>
+}
+
+function CommunitiesHub({ communities, myGroups, query, setQuery, loading, error, onRetry, signedIn, onOpen, onSignIn,
+  canHost, mode, setMode, onCreate, onSave, onShare, baseURL, session, isAdmin }) {
+  const managed = isAdmin ? communities : myGroups.filter(group => group.owner_user_id === session?.user?.id)
+  return <>
+    <PageHeading eyebrow="Find your people, or host a circle" title="Communities" description="Discover therapist-guided spaces and manage your circles in one place."
+      action={signedIn ? <span className="counter-chip"><Users size={15} /> {myGroups.length} joined</span> : null} />
+    <ValueStatement icon={HeartHandshake} title="Support grows in a shared space" text="Explore open community details or, as a verified therapist, host conversation and resources for your group." />
+    {canHost && <div className="section-switch" role="tablist" aria-label="Community workspace">
+      <button role="tab" aria-selected={mode === 'discover'} className={mode === 'discover' ? 'selected' : ''} onClick={() => setMode('discover')}><Search size={15} /> Discover</button>
+      <button role="tab" aria-selected={mode === 'manage'} className={mode === 'manage' ? 'selected' : ''} onClick={() => setMode('manage')}><Settings2 size={15} /> Manage groups <span>{managed.length}</span></button>
+    </div>}
+    {mode === 'manage' && canHost ? <HostStudio communities={managed} canHost={canHost} session={session} onCreate={onCreate} onOpen={onOpen}
+      onSave={onSave} onShare={onShare} baseURL={baseURL} /> : <CommunityDirectory communities={communities} myGroups={myGroups} query={query}
+      setQuery={setQuery} loading={loading} error={error} onRetry={onRetry} signedIn={signedIn} onOpen={onOpen} onSignIn={onSignIn} showHeading={false} />}
+  </>
+}
+
+function PostCard({ post, session, liked, saved, onLike, onSave, onSignIn }) {
+  return <article className="feed-card">
+    <PostMedia post={post} />
+    <div className="feed-content">
+      <div className="feed-author"><span className="small-avatar"><Brain size={15} /></span><div><b>{post.author_name || 'Catharsia therapist'}</b>
+        <small>{post.author_credentials || 'Verified therapist'} · {formatDate(post.created_at)}</small></div><BadgeCheck className="verified-mark" size={17} /></div>
+      <h2>{post.title || post.summary || post.body || 'A note for today'}</h2>{post.body && post.body !== post.title && post.body !== post.summary && <p>{post.body}</p>}
+      <div className="post-meta"><span><MessageCircle size={15} /> {post.comment_count || post.comments_count || 0} conversations</span><span>{post.likes || 0} appreciations</span></div>
+      <div className="post-actions">
+        <button className={liked ? 'selected' : ''} onClick={session ? onLike : onSignIn} aria-pressed={liked}><Heart size={17} fill={liked ? 'currentColor' : 'none'} /> Appreciate</button>
+        <button className={saved ? 'selected' : ''} onClick={session ? onSave : onSignIn} aria-pressed={saved}><Bookmark size={17} fill={saved ? 'currentColor' : 'none'} /> {saved ? 'Saved' : 'Save'}</button>
+      </div>
+    </div>
+  </article>
+}
+
+function SavedPage({ session, revision, savedIDs, likedIDs, onSave, onLike, onSignIn, onExplore }) {
+  const [posts, setPosts] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [reloadKey, setReloadKey] = useState(0)
+  useEffect(() => {
+    let active = true
+    if (!session) { setPosts([]); setLoading(false); setError(''); return }
+    const load = async () => {
+      setLoading(true); setError('')
+      try {
+        const { data: rows, error: savedError } = await client.from('kathar_saved_items').select('target_id,created_at')
+          .eq('tenant_id', config.tenant).eq('viewer_id', session.user.id).eq('kind', 'post').order('created_at', { ascending: false }).limit(100)
+        if (savedError) throw savedError
+        const ids = (rows || []).map(row => row.target_id)
+        if (!ids.length) { if (active) setPosts([]); return }
+        const { data, error: postError } = await client.from('kathar_posts')
+          .select('id,title,summary,body,format,topics,link_url,cover_url,media_url,media_items,author_name,author_credentials,created_at,likes,comment_count,comments_count')
+          .eq('tenant_id', config.tenant).eq('is_mock', false).eq('is_test', false).in('id', ids)
+        if (postError) throw postError
+        const order = new Map(ids.map((id, index) => [id, index]))
+        if (active) setPosts((data || []).sort((a, b) => order.get(a.id) - order.get(b.id)))
+      } catch (cause) { if (active) setError(cause.message || 'Saved posts could not load.') }
+      finally { if (active) setLoading(false) }
+    }
+    load()
+    return () => { active = false }
+  }, [session, revision, reloadKey])
+  return <>
+    <PageHeading eyebrow="Keep what helps" title="Saved" description="A quiet shelf for thoughts and resources you want to return to." />
+    {!session ? <SignInPanel onSignIn={onSignIn} title="Your saved posts live here" text="Sign in to keep a private collection of posts you want to revisit." /> :
+      loading ? <div className="loading-state" role="status">Gathering your saved posts…</div> : error ? <div className="error-panel" role="alert"><div><h2>Saved posts couldn’t load</h2><p>{error}</p></div><button className="button button-outline button-small" onClick={() => setReloadKey(value => value + 1)}>Try again</button></div> : posts.length ?
+        <div className="feed-grid saved-grid">{posts.map(post => <PostCard key={post.id} post={post} session={session} liked={likedIDs.includes(post.id)} saved={savedIDs.includes(post.id)}
+          onLike={() => onLike(post)} onSave={() => onSave(post)} onSignIn={onSignIn} />)}</div> :
+        <div className="empty-panel saved-empty"><span className="saved-empty-mark"><Bookmark size={25} /></span><h2>Make a little space for what matters</h2><p>Save a post from Explore and it will be easy to find here later.</p><button className="button button-outline" onClick={onExplore}>Go to Explore <ArrowRight size={15} /></button></div>}
+  </>
+}
+
+function SignInPanel({ onSignIn, title, text }) {
+  return <div className="join-panel account-gate"><div className="join-mark"><UserRound size={20} /></div><h2>{title}</h2><p>{text}</p><button className="button button-primary" onClick={onSignIn}>Sign in <ArrowRight size={16} /></button><small>Explore remains open without an account.</small></div>
+}
+
+function ProfilePage({ session, isAdmin, panel, setPanel, onSignIn, onSignOut, notify }) {
+  return <>
+    <PageHeading eyebrow="Your Catharsia account" title="Profile" description="Manage the details people see and your account access." />
+    {!session ? <SignInPanel onSignIn={onSignIn} title="Your profile starts here" text="Sign in to set your name, username, and profile photo." /> : <>
+      <div className="profile-tabs" role="tablist" aria-label="Profile sections">
+        <button role="tab" aria-selected={panel === 'profile'} className={panel === 'profile' ? 'selected' : ''} onClick={() => setPanel('profile')}><UserRound size={15} /> My profile</button>
+        {isAdmin && <button role="tab" aria-selected={panel === 'admin'} className={panel === 'admin' ? 'selected' : ''} onClick={() => setPanel('admin')}><ShieldCheck size={15} /> Admin</button>}
+      </div>
+      {panel === 'admin' && isAdmin ? <AdminDashboard notify={notify} /> : <MemberProfileEditor session={session} onSignOut={onSignOut} notify={notify} />}
+    </>}
+  </>
+}
+
+function MemberProfileEditor({ session, onSignOut, notify }) {
+  const [profile, setProfile] = useState({ full_name: '', username: '', bio: '', photo_url: '' })
+  const [file, setFile] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const preview = useMemo(() => file ? URL.createObjectURL(file) : profile.photo_url, [file, profile.photo_url])
+  useEffect(() => () => { if (file && preview?.startsWith('blob:')) URL.revokeObjectURL(preview) }, [file, preview])
+  useEffect(() => {
+    let active = true
+    const load = async () => {
+      setLoading(true); setError('')
+      try {
+        const { error: ensureError } = await client.rpc('kathar_ensure_current_user')
+        if (ensureError) throw ensureError
+        const { data, error: profileError } = await client.from('kathar_profiles').select('full_name,display_name,username,photo_url,bio')
+          .eq('tenant_id', config.tenant).eq('id', session.user.id).maybeSingle()
+        if (profileError) throw profileError
+        if (active) setProfile({ full_name: data?.full_name || data?.display_name || session.user.user_metadata?.full_name || '',
+          username: data?.username || '', bio: data?.bio || '', photo_url: data?.photo_url || '' })
+      } catch (cause) { if (active) setError(cause.message || 'Your profile could not load.') }
+      finally { if (active) setLoading(false) }
+    }
+    load()
+    return () => { active = false }
+  }, [session])
+  const save = async event => {
+    event.preventDefault(); setSaving(true); setError('')
+    const name = profile.full_name.trim()
+    const username = profile.username.trim().replace(/^@/, '').toLowerCase()
+    if (!name || name.length > 60) { setError('Use a display name between 1 and 60 characters.'); setSaving(false); return }
+    if (username && !/^[a-z0-9_]{3,24}$/.test(username)) { setError('Usernames use 3–24 lowercase letters, numbers, or underscores.'); setSaving(false); return }
+    if (file && (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 4 * 1024 * 1024)) {
+      setError('Choose a JPEG, PNG, or WebP image under 4 MB.'); setSaving(false); return
+    }
+    let uploadedPath = ''
+    try {
+      let photoURL = profile.photo_url || null
+      if (file) {
+        const extension = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
+        uploadedPath = `${config.tenant}/${session.user.id}/${crypto.randomUUID()}.${extension}`
+        const { error: uploadError } = await client.storage.from('kathar-profile-avatars').upload(uploadedPath, file, { contentType: file.type, cacheControl: '31536000', upsert: false })
+        if (uploadError) throw uploadError
+        photoURL = client.storage.from('kathar-profile-avatars').getPublicUrl(uploadedPath).data.publicUrl
+      }
+      const { data, error: updateError } = await client.from('kathar_profiles').update({
+        full_name: name, display_name: name, username: username || null, bio: profile.bio.trim().slice(0, 260), photo_url: photoURL, updated_at: new Date().toISOString(),
+      }).eq('tenant_id', config.tenant).eq('id', session.user.id).select('id').maybeSingle()
+      if (updateError) throw updateError
+      if (!data) throw new Error('Your profile was not saved. Please reload and try again.')
+      if (profile.photo_url && file) {
+        const old = profile.photo_url.split('/storage/v1/object/public/kathar-profile-avatars/')[1]
+        if (old) await client.storage.from('kathar-profile-avatars').remove([decodeURIComponent(old)]).catch(() => {})
+      }
+      setProfile(current => ({ ...current, full_name: name, username, photo_url: photoURL }))
+      setFile(null); notify('Profile saved.')
+    } catch (cause) {
+      if (uploadedPath) await client.storage.from('kathar-profile-avatars').remove([uploadedPath]).catch(() => {})
+      setError(cause.message || 'Your profile could not be saved.')
+    } finally { setSaving(false) }
+  }
+  const removePhoto = () => { setFile(null); setProfile(current => ({ ...current, photo_url: '' })) }
+  if (loading) return <div className="loading-state" role="status">Loading your profile…</div>
+  return <div className="profile-layout">
+    <section className="profile-preview panel-card">
+      <div className="profile-avatar-large">{preview ? <img src={preview} alt="Profile" /> : <span>{profile.full_name.slice(0, 1).toUpperCase() || 'C'}</span>}</div>
+      <div className="eyebrow">Public profile</div><h2>{profile.full_name || 'Your name'}</h2><p>{profile.username ? `@${profile.username}` : 'Choose a username'}</p>
+      {profile.bio && <div className="profile-bio">{profile.bio}</div>}
+      <div className="profile-email"><ShieldCheck size={15} /> {session.user.email} <span>Private</span></div>
+    </section>
+    <form className="profile-form panel-card" onSubmit={save}>
+      <div className="card-head"><div><div className="eyebrow">Account settings</div><h2>Edit your profile</h2></div><UserRound size={19} /></div>
+      <label>Profile photo<input className="file-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={event => setFile(event.target.files?.[0] || null)} /></label>
+      {preview && <button type="button" className="text-button remove-photo" onClick={removePhoto}>Remove photo</button>}
+      <label>Display name<input className="clean-input" value={profile.full_name} maxLength="60" onChange={event => setProfile({ ...profile, full_name: event.target.value })} placeholder="Name people see" /></label>
+      <label>Username<div className="username-input"><span>@</span><input className="clean-input" value={profile.username} maxLength="24" onChange={event => setProfile({ ...profile, username: event.target.value })} placeholder="username" /></div></label>
+      <label>Bio <small>Optional · 260 characters</small><textarea className="clean-input" rows="4" maxLength="260" value={profile.bio} onChange={event => setProfile({ ...profile, bio: event.target.value })} placeholder="A few words about what matters to you" /></label>
+      {error && <p className="form-error profile-error" role="alert">{error}</p>}
+      <div className="profile-form-footer"><span>Your email stays private.</span><button className="button button-primary" disabled={saving}>{saving ? 'Saving…' : 'Save profile'} <Check size={15} /></button></div>
+      <button type="button" className="button button-outline signout-button" onClick={onSignOut}><LogIn size={16} className="flip-icon" /> Sign out</button>
+    </form>
+  </div>
+}
+
+function AdminDashboard() {
+  const [counts, setCounts] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [updatedAt, setUpdatedAt] = useState('')
+  const refresh = useCallback(async () => {
+    setLoading(true); setError('')
+    const base = () => client
+    const requests = [
+      base().from('kathar_profiles').select('id', { count: 'exact', head: true }).eq('tenant_id', config.tenant).or('deactivated.is.null,deactivated.eq.false'),
+      base().from('kathar_posts').select('id', { count: 'exact', head: true }).eq('tenant_id', config.tenant).eq('is_mock', false).eq('is_test', false),
+      base().from('kathar_communities').select('id', { count: 'exact', head: true }).eq('tenant_id', config.tenant).eq('is_mock', false),
+      base().from('kathar_community_members').select('id', { count: 'exact', head: true }).eq('tenant_id', config.tenant).eq('status', 'active'),
+      base().from('kathar_verification_applications').select('id', { count: 'exact', head: true }).eq('tenant_id', config.tenant).in('status', ['submitted', 'in_review']),
+    ]
+    try {
+      const results = await Promise.all(requests)
+      const failed = results.find(result => result.error)
+      if (failed) throw failed.error
+      setCounts({ members: results[0].count || 0, posts: results[1].count || 0, communities: results[2].count || 0, memberships: results[3].count || 0, applications: results[4].count || 0 })
+      setUpdatedAt(new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }))
+    } catch (cause) { setError(cause.message || 'Admin metrics could not load.') }
+    finally { setLoading(false) }
+  }, [])
+  useEffect(() => { refresh() }, [refresh])
+  return <section className="admin-dashboard">
+    <div className="admin-heading"><div><div className="eyebrow">Catharsia operations</div><h2>Admin overview</h2><p>Live counts from the Catharsia tenant.</p></div><button className="button button-outline button-small" onClick={refresh} disabled={loading}>{loading ? 'Updating…' : 'Refresh'}</button></div>
+    {error ? <div className="error-panel" role="alert"><div><h2>Metrics couldn’t load</h2><p>{error}</p></div><button className="button button-outline button-small" onClick={refresh}>Try again</button></div> :
+      <div className="admin-metrics" aria-live="polite">{[
+        ['People', counts?.members, 'active Catharsia accounts', Users],
+        ['Posts', counts?.posts, 'published posts', MessageCircle],
+        ['Communities', counts?.communities, 'therapist-led spaces', HeartHandshake],
+        ['Memberships', counts?.memberships, 'active group memberships', UserRound],
+        ['Applications', counts?.applications, 'open verification reviews', ShieldCheck],
+      ].map(([label, value, detail, Icon]) => <article className="metric-card" key={label}><span className="metric-icon"><Icon size={18} /></span><div className="metric-value">{loading ? '—' : value}</div><b>{label}</b><small>{detail}</small></article>)}</div>}
+    {updatedAt && <p className="metrics-updated">Updated {updatedAt} · counts respect the tenant’s access rules</p>}
+    <div className="admin-access-note"><ShieldCheck size={16} /><span>Admin tools are visible only when Supabase confirms administrator access.</span></div>
+  </section>
+}
+
+function ExplorePage({ feed, loading, session, likedIDs, savedIDs, onLike, onSave, onBrowse, onSignIn }) {
   return <>
     <PageHeading eyebrow="A steadier kind of social space" title="Explore" description="Short perspectives and practical ideas from trusted therapists." />
     <ValueStatement icon={HeartHandshake} title="Useful voices, in a calmer feed" text="Explore therapist-led ideas at your own pace, then keep learning together in a community." />
     {loading ? <div className="loading-state">Gathering the latest posts…</div> : feed.length === 0 ? <div className="empty-panel"><Brain size={30} /><h2>Your next useful thought is coming</h2><p>New therapist perspectives will appear here as they’re shared.</p><button className="button button-outline" onClick={onBrowse}>Explore communities <ArrowRight size={16} /></button></div> :
-      <div className="feed-grid">{feed.map(post => <article className="feed-card" key={post.id}>
-        <PostMedia post={post} />
-        <div className="feed-content"><div className="feed-author"><span className="small-avatar"><Brain size={15} /></span><div><b>{post.author_name || 'Catharsia therapist'}</b><small>{post.author_credentials || 'Verified therapist'} · {formatDate(post.created_at)}</small></div><BadgeCheck className="verified-mark" size={17} /></div>
-          <h2>{post.title || post.summary || post.body || 'A note for today'}</h2>{post.body && post.body !== post.title && <p>{post.body}</p>}
-          <div className="post-meta"><span><HeartHandshake size={15} /> {post.likes || 0} appreciations</span><span><MessageCircle size={15} /> {post.comment_count || 0} conversations</span></div>
-        </div></article>)}</div>}
+      <div className="feed-grid">{feed.map(post => <PostCard key={post.id} post={post} session={session} liked={likedIDs.includes(post.id)} saved={savedIDs.includes(post.id)}
+        onLike={() => onLike(post)} onSave={() => onSave(post)} onSignIn={onSignIn} />)}</div>}
     <button className="soft-next" onClick={onBrowse}>Find a community <ArrowRight size={16} /></button>
   </>
 }
@@ -356,10 +620,12 @@ function PostMedia({ post }) {
   </div>
 }
 
-function CommunityDirectory({ communities, myGroups, query, setQuery, loading, error, onRetry, signedIn, onOpen, onSignIn }) {
+function CommunityDirectory({ communities, myGroups, query, setQuery, loading, error, onRetry, signedIn, onOpen, onSignIn, showHeading = true }) {
   return <>
-    <PageHeading eyebrow="Support, with people who get it" title="Communities" description="Therapist-guided spaces built around shared needs, conversation, and helpful resources." action={signedIn ? <span className="counter-chip"><Users size={15} /> {myGroups.length} joined</span> : null} />
-    <ValueStatement icon={Users} title="A place to feel less alone" text="Join a small, guided circle to learn together, share at your pace, and find resources curated for the group." />
+    {showHeading && <>
+      <PageHeading eyebrow="Support, with people who get it" title="Communities" description="Therapist-guided spaces built around shared needs, conversation, and helpful resources." action={signedIn ? <span className="counter-chip"><Users size={15} /> {myGroups.length} joined</span> : null} />
+      <ValueStatement icon={Users} title="A place to feel less alone" text="Join a small, guided circle to learn together, share at your pace, and find resources curated for the group." />
+    </>}
     <div className="directory-tools"><div className="search-box"><Search size={17} /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search by topic or name" /></div>
       {!signedIn && <button className="text-button" onClick={onSignIn}>Sign in to join <ArrowUpRight size={15} /></button>}</div>
     {loading ? <div className="loading-state" role="status" aria-live="polite">Finding communities…</div> : error ?

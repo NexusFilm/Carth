@@ -13,3 +13,68 @@
 .error-panel h2{margin:0 0 5px;color:#492b37;font-size:16px}
 .error-panel p{margin:0;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
 @media(max-width:640px){.post-media-slide{height:250px}.error-panel{align-items:flex-start;flex-direction:column}}
+
+/* Catharsia's shared account shell: familiar tabs, warm pastels, and an actual profile. */
+.brand-logo{display:block;width:42px;height:42px;object-fit:contain}
+.brand small{color:var(--teal);font-size:9px;font-weight:800;letter-spacing:2px}
+.user-avatar-button{display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:transparent}
+.user-avatar{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;object-fit:cover;background:linear-gradient(135deg,#40b9ad,#6943b5);color:white;font-size:14px;font-weight:800}
+.topnav{gap:4px}
+.topnav button{white-space:nowrap}
+.feed-card{overflow:hidden}
+.post-actions{display:flex;align-items:center;gap:8px;margin-top:13px;padding-top:11px;border-top:1px solid var(--line)}
+.post-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 11px;border:0;border-radius:11px;background:transparent;color:#706a7f;font-size:11px;font-weight:700;transition:background .16s,color .16s}
+.post-actions button:hover{background:#f2edf9;color:var(--purple)}
+.post-actions button.selected{background:#f0eaf9;color:var(--purple)}
+.section-switch,.profile-tabs{display:flex;align-items:center;gap:5px;width:max-content;max-width:100%;padding:5px;margin:0 0 18px;border:1px solid rgba(255,255,255,.95);border-radius:15px;background:rgba(255,255,255,.72);box-shadow:0 8px 22px rgba(48,34,74,.04)}
+.section-switch button,.profile-tabs button{display:inline-flex;align-items:center;gap:7px;min-height:37px;padding:0 13px;border:0;border-radius:11px;background:transparent;color:#716a7d;font-size:11px;font-weight:750;white-space:nowrap}
+.section-switch button.selected,.profile-tabs button.selected{background:#ede6f7;color:var(--purple)}
+.section-switch button span{display:grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:#fff;color:var(--teal);font-size:10px}
+.profile-layout{display:grid;grid-template-columns:minmax(250px,.8fr) minmax(360px,1.4fr);gap:18px;align-items:start}
+.panel-card{min-width:0;padding:23px;border:1px solid var(--line);border-radius:21px;background:rgba(255,255,255,.86);box-shadow:0 12px 34px rgba(48,34,74,.055)}
+.profile-preview{display:flex;flex-direction:column;align-items:center;text-align:center;background:linear-gradient(145deg,#f0eafa,#e7f4f0 85%,#fff)}
+.profile-avatar-large{width:96px;height:96px;display:grid;place-items:center;overflow:hidden;margin:4px 0 18px;border:4px solid rgba(255,255,255,.9);border-radius:50%;background:linear-gradient(135deg,#51bdb2,#6943b5);box-shadow:0 8px 24px rgba(67,49,108,.15);color:white;font-size:32px;font-weight:800}
+.profile-avatar-large img{width:100%;height:100%;object-fit:cover}
+.profile-preview h2{margin:7px 0 4px;font:800 24px ui-rounded,-apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:-.5px}
+.profile-preview>p{margin:0;color:var(--muted);font-size:13px}
+.profile-bio{max-width:430px;margin:15px 0 3px;color:#514b60;font-size:13px;line-height:1.65;white-space:pre-wrap}
+.profile-email{display:flex;align-items:center;gap:7px;margin-top:22px;padding-top:15px;width:100%;border-top:1px solid rgba(41,34,58,.09);color:#746d80;font-size:10px;overflow-wrap:anywhere}
+.profile-email svg{flex:none;color:var(--teal)}
+.profile-email span{margin-left:auto;color:#8b8595;font-size:9px}
+.profile-form .card-head{margin-bottom:14px}
+.profile-form label{display:block;margin:13px 0;color:#615a6d;font-size:11px;font-weight:750}
+.profile-form label small{display:inline;margin-left:4px;color:#8a8493;font-size:10px;font-weight:500}
+.profile-form .clean-input{display:block;font-weight:500}
+.file-input{display:block;width:100%;margin-top:8px;color:#6e687a;font-size:11px}
+.username-input{display:flex;align-items:center;gap:6px;margin-top:5px}
+.username-input>span{color:var(--purple);font-size:14px;font-weight:800}
+.username-input .clean-input{margin:0}
+.remove-photo{margin-top:-8px;padding:0}
+.profile-error{margin:8px 0}
+.profile-form-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:15px;border-top:1px solid var(--line);color:#817b8a;font-size:10px}
+.signout-button{width:100%;justify-content:center;margin-top:12px}
+.flip-icon{transform:scaleX(-1)}
+.admin-dashboard{display:grid;gap:15px}
+.admin-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;padding:20px 22px;border:1px solid var(--line);border-radius:19px;background:linear-gradient(125deg,#f0eafa,#e8f4f1)}
+.admin-heading h2{margin:5px 0;font:800 21px ui-rounded,-apple-system,BlinkMacSystemFont,sans-serif}
+.admin-heading p{margin:0;color:var(--muted);font-size:12px}
+.admin-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.metric-card{min-height:142px;padding:17px;border:1px solid var(--line);border-radius:18px;background:white}
+.metric-card:nth-child(2){background:#eff7f4}.metric-card:nth-child(3){background:#f3eef9}.metric-card:nth-child(4){background:#f8f1f6}.metric-card:nth-child(5){background:#f4f3fb}
+.metric-icon{display:grid;place-items:center;width:34px;height:34px;margin-bottom:10px;border-radius:12px;background:rgba(255,255,255,.8);color:var(--purple)}
+.metric-value{font:800 26px ui-rounded,-apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:-.8px}
+.metric-card>b,.metric-card>small{display:block}
+.metric-card>b{margin-top:2px;font-size:11px}
+.metric-card>small{margin-top:4px;color:#817b8a;font-size:9px}
+.metrics-updated{margin:0;color:#837d8c;font-size:10px}
+.admin-access-note{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:13px;background:#eaf4f1;color:#4e8179;font-size:10px}
+.admin-access-note svg{flex:none}
+.account-gate{width:min(580px,100%);margin:15px auto}
+.saved-empty{width:min(700px,100%);margin:20px auto;padding:38px 25px;text-align:center;background:linear-gradient(135deg,#f0eafa,#eaf5f1 82%,white)}
+.saved-empty-mark{display:grid;place-items:center;width:52px;height:52px;margin:0 auto 15px;border-radius:17px;background:#fff;color:var(--purple);box-shadow:0 8px 20px rgba(48,34,74,.08)}
+.saved-empty h2{margin:0 0 8px;font:800 22px ui-rounded,-apple-system,BlinkMacSystemFont,sans-serif}
+.saved-empty p{max-width:390px;margin:0 auto 18px;color:var(--muted);font-size:12px;line-height:1.6}
+.profile-tabs{margin-bottom:16px}
+@media(max-width:980px){.profile-layout{grid-template-columns:minmax(220px,.75fr) minmax(320px,1.25fr)}.admin-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.topnav{gap:0}.topnav button{min-width:0;flex:1;padding:9px 3px;font-size:9px;gap:4px}.topnav button svg{width:14px;height:14px}.profile-layout{grid-template-columns:1fr}.profile-preview{padding:19px}.profile-form{padding:18px}.section-switch,.profile-tabs{width:100%;justify-content:stretch}.section-switch button,.profile-tabs button{flex:1;justify-content:center;padding:0 8px;font-size:10px}.admin-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.metric-card{min-height:127px;padding:13px}.admin-heading{padding:16px}.admin-heading h2{font-size:18px}.post-actions{gap:4px}.post-actions button{padding:0 8px}.profile-form-footer{align-items:flex-start;flex-direction:column}.profile-form-footer .button{width:100%;justify-content:center}.user-menu{gap:5px}}
+@media(prefers-reduced-motion:reduce){.post-actions button{transition:none}}

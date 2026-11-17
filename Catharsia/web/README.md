@@ -1,17 +1,23 @@
-# Catharsia desktop community workspace
+# Catharsia web
 
-Responsive web client for the existing Catharsia Supabase tenant. The public Explore and community directory are readable without an account. Joining a private group, posting, and therapist host controls require a Supabase session.
+Responsive Catharsia client for the existing Supabase tenant. The shared shell follows the app’s four sections: **Explore**, **Saved**, **Communities**, and **Profile**. Therapist group management lives inside Communities; verified admins see the Admin overview inside Profile.
 
 ## Local development
 
-1. Keep `web/.env.local` private and provide the existing Supabase project URL, **publishable** key, tenant ID, and (optionally) the final public website origin. Never use a service-role key in this client.
-2. Add the local origin (`http://localhost:5173/**`) to Supabase Authentication → URL Configuration → Redirect URLs. Google sign-in also returns to this origin.
-3. Run `npm ci` then `npm run dev` from this folder.
+1. Copy `.env.example` to `.env.local` and add the existing Supabase project URL, publishable key, Kathar tenant ID, and public base URL. Keep `.env.local` private. Never use a Supabase secret or service-role key in the browser.
+2. Add `http://localhost:5173/**` to Supabase Authentication → URL Configuration → Redirect URLs for web sign-in.
+3. Run `npm ci` and `npm run dev` from this folder.
 
-The project uses only Supabase client access and row-level security. The public share URL is based on `VITE_PUBLIC_BASE_URL`; set it to the actual website before printing or distributing QR cards. A local preview's QR code points to that local origin.
+The app uses Supabase Auth, Postgres row-level security, and Storage directly. Public Explore and the community directory remain readable without signing in. Sign-in is needed to save or appreciate posts, join groups, edit a profile, or use host tools.
 
-## Host workspace
+## Profile and administration
 
-Verified Catharsia therapists and administrators can create groups, manage the group description/guidelines/member limit, review the active roster, remove members, publish therapist guidance or curated HTTPS resources, and download a print-ready SVG community card with a unique QR code. Public community pages expose group information only; discussion posts and roster remain member/host-only.
+Profiles edit their display name, username, bio, and photo in `kathar_profiles`. Photos use the tenant-scoped `kathar-profile-avatars` bucket. The Admin overview is rendered only after `kathar_is_admin()` confirms the current session, and its totals are tenant-scoped exact counts from Supabase.
 
-The web client is not deployed. Before launch, deploy the Vite `dist` output to the selected public host and add the production origin to Supabase Authentication redirect URLs.
+## Therapist workspace
+
+Verified therapists and administrators can manage groups from the Communities section, edit group details, review active members, publish guidance or secure resource links, and create a share card with a unique QR code. Public community URLs remain shareable at `/community/:id`.
+
+## Production
+
+The web client deploys to Vercel as the `catharsia` project. The production domain is `https://catharsia.com`; set `VITE_PUBLIC_BASE_URL` to that address before generating printed QR cards. Keep the domain in Supabase Auth’s redirect allow-list.

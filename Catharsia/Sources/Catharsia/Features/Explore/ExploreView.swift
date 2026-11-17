@@ -3,20 +3,26 @@ import SwiftUI
 import UIKit
 
 struct ExploreView: View {
+    let feed: ExploreFeedStore
+    @Binding private var isComposerActionsPresented: Bool
+
     @Environment(SessionStore.self) private var session
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
-    @State private var feed = ExploreFeedStore()
     @State private var activeSheet: ExploreSheet?
     @State private var isNotificationCenterPresented = false
     @State private var reportPost: PublishedPost?
     @State private var deletePost: PublishedPost?
     @State private var selectedTopicID: String?
     @State private var unreadNotificationCount = 0
-    @State private var isComposerActionsPresented = false
     @State private var wasBackgrounded = false
     @State private var pullRefreshStatus: String?
     @State private var pullRefreshFeedbackID = UUID()
+
+    init(feed: ExploreFeedStore, isComposerActionsPresented: Binding<Bool>) {
+        self.feed = feed
+        _isComposerActionsPresented = isComposerActionsPresented
+    }
 
     var body: some View {
         NavigationStack {
@@ -118,7 +124,6 @@ struct ExploreView: View {
 
                 if isComposerActionsPresented {
                     Color.clear
-                        .ignoresSafeArea()
                         .contentShape(Rectangle())
                         .onTapGesture {
                             withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
@@ -127,13 +132,6 @@ struct ExploreView: View {
                         }
                         .accessibilityHidden(true)
                         .zIndex(2)
-                }
-            }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                if session.canPublish {
-                    ComposePostView(isComposerActionsPresented: $isComposerActionsPresented) { caption, topicID, media, externalURL in
-                        try await feed.publish(caption: caption, topicID: topicID, media: media, externalURL: externalURL)
-                    }
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
@@ -291,9 +289,9 @@ struct ExploreView: View {
     }
 
     private func feedCardWidth(in viewport: CGSize) -> CGFloat {
-        let widthLimit = max(220, viewport.width - 28)
-        let availableMediaHeight = viewport.height > 0 ? max(240, viewport.height - 60) : 460
-        let heightLimit = availableMediaHeight * 4.0 / 5.0
+        let widthLimit = max(0, viewport.width - 28)
+        let availablePostHeight = viewport.height > 0 ? max(220, viewport.height - 72) : 460
+        let heightLimit = availablePostHeight * 4.0 / 5.0
         return min(640, min(widthLimit, heightLimit))
     }
 

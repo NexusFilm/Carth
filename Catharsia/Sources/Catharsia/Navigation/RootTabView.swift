@@ -21,6 +21,8 @@ struct RootTabView: View {
     @AppStorage("hasCompletedWelcomeOnboarding") private var hasCompletedWelcomeOnboarding = false
     @State private var selection: CatharsiaTab = .explore
     @State private var visitedTabs: Set<CatharsiaTab> = [.explore]
+    @State private var exploreFeed = ExploreFeedStore()
+    @State private var isComposerActionsPresented = false
     @State private var inAppBanner: InAppNotificationBanner?
     @Environment(SessionStore.self) private var session
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -89,6 +91,23 @@ struct RootTabView: View {
                 .zIndex(10)
             }
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if hasCompletedWelcomeOnboarding {
+                VStack(spacing: 0) {
+                    if selection == .explore && session.canPublish {
+                        ComposePostView(isComposerActionsPresented: $isComposerActionsPresented) { caption, topicID, media, externalURL in
+                            try await exploreFeed.publish(caption: caption, topicID: topicID, media: media, externalURL: externalURL)
+                        }
+                    }
+
+                    CatharsiaBottomDock(
+                        selection: selection,
+                        onSelect: selectTab
+                    )
+                }
+                .background(CatharsiaStyle.canvas)
+            }
+        }
         .task { await session.restoreSession() }
         .onReceive(NotificationCenter.default.publisher(for: .catharsiaOpenNotificationCenter)) { _ in
             selectTab(.explore)
@@ -113,6 +132,7 @@ struct RootTabView: View {
         }
         .onChange(of: selection) { _, selectedTab in
             visitedTabs.insert(selectedTab)
+            if selectedTab != .explore { isComposerActionsPresented = false }
             guard selectedTab == .explore else { return }
             NotificationCenter.default.post(name: .catharsiaExploreTabSelected, object: nil)
         }
@@ -121,7 +141,7 @@ struct RootTabView: View {
     private var mainTabs: some View {
         ZStack {
             if visitedTabs.contains(.explore) {
-                ExploreView()
+                ExploreView(feed: exploreFeed, isComposerActionsPresented: $isComposerActionsPresented)
                     .tabDestination(isSelected: selection == .explore)
             }
             if visitedTabs.contains(.communities) {
@@ -138,12 +158,6 @@ struct RootTabView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            CatharsiaBottomDock(
-                selection: selection,
-                onSelect: selectTab
-            )
-        }
     }
 
     private func selectTab(_ tab: CatharsiaTab) {

@@ -92,21 +92,7 @@ struct RootTabView: View {
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if hasCompletedWelcomeOnboarding {
-                VStack(spacing: 0) {
-                    if selection == .explore && session.canPublish {
-                        ComposePostView(isComposerActionsPresented: $isComposerActionsPresented) { caption, topicID, media, externalURL in
-                            try await exploreFeed.publish(caption: caption, topicID: topicID, media: media, externalURL: externalURL)
-                        }
-                    }
-
-                    CatharsiaBottomDock(
-                        selection: selection,
-                        onSelect: selectTab
-                    )
-                }
-                .background(CatharsiaStyle.canvas)
-            }
+            bottomNavigation
         }
         .task { await session.restoreSession() }
         .onReceive(NotificationCenter.default.publisher(for: .catharsiaOpenNotificationCenter)) { _ in
@@ -158,6 +144,34 @@ struct RootTabView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private var bottomNavigation: some View {
+        if hasCompletedWelcomeOnboarding {
+            VStack(spacing: 0) {
+                if selection == .explore && session.canPublish {
+                    exploreComposer
+                }
+
+                CatharsiaBottomDock(
+                    selection: selection,
+                    onSelect: selectTab
+                )
+            }
+            .background(CatharsiaStyle.canvas)
+        }
+    }
+
+    private var exploreComposer: some View {
+        ComposePostView(
+            isComposerActionsPresented: $isComposerActionsPresented,
+            onPublish: publishPost
+        )
+    }
+
+    private func publishPost(_ caption: String, _ topicID: String, _ media: [PostMediaUpload], _ externalURL: String?) async throws {
+        try await exploreFeed.publish(caption: caption, topicID: topicID, media: media, externalURL: externalURL)
     }
 
     private func selectTab(_ tab: CatharsiaTab) {
